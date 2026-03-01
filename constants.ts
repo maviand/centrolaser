@@ -365,12 +365,12 @@ export const MOCK_APPOINTMENTS: Appointment[] = [
 ];
 
 export const MOCK_TRANSACTIONS: Transaction[] = [
-  { id: 'T-001', date: '2024-05-20', description: 'Consulta Inicial - Rosa Martinez', amount: 3500, type: 'income', category: 'Consultas', discipline: Discipline.Refractive, patientId: 'P-1001' },
+  { id: 'T-001', date: '2024-05-20', description: 'Consulta Inicial - Rosa Martinez', amount: 3500, type: 'income', category: 'Consultas', discipline: Discipline.Refractive, patientId: 'P-1001', doctorId: 'doc-2' },
   { id: 'T-002', date: '2024-05-20', description: 'Compra Insumos Quirúrgicos', amount: 150000, type: 'expense', category: 'Insumos' },
-  { id: 'T-003', date: '2024-05-21', description: 'Cirugía Catarata - Juan Perez', amount: 85000, type: 'income', category: 'Cirugía', discipline: Discipline.Cataract, patientId: 'P-1002' },
+  { id: 'T-003', date: '2024-05-21', description: 'Cirugía Catarata - Juan Perez', amount: 85000, type: 'income', category: 'Cirugía', discipline: Discipline.Cataract, patientId: 'P-1002', doctorId: 'doc-2' },
   { id: 'T-004', date: '2024-05-21', description: 'Pago Servicios (Luz/Internet)', amount: 12000, type: 'expense', category: 'Servicios' },
   { id: 'T-005', date: '2024-05-22', description: 'Lentes Intraoculares', amount: 45000, type: 'expense', category: 'Inventario' },
-  { id: 'T-006', date: '2024-05-23', description: 'Evaluación Pediátrica', amount: 4000, type: 'income', category: 'Consultas', discipline: Discipline.Pediatric, patientId: 'P-1004' },
+  { id: 'T-006', date: '2024-05-23', description: 'Evaluación Pediátrica', amount: 4000, type: 'income', category: 'Consultas', discipline: Discipline.Pediatric, patientId: 'P-1004', doctorId: 'doc-4' },
 ];
 
 export const REFRACTIVE_STEPS = [

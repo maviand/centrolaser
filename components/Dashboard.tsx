@@ -1,14 +1,20 @@
 import React from 'react';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, Legend 
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend
 } from 'recharts';
 import { Users, DollarSign, Activity, Calendar } from 'lucide-react';
-import { MOCK_PATIENTS, MOCK_TRANSACTIONS } from '../constants';
-import { Discipline } from '../types';
+import { Discipline, Transaction, UserRole } from '../types';
+import { MOCK_PATIENTS } from '../constants';
 
-const KPICard: React.FC<{ title: string; value: string; icon: React.ElementType; color: string; trend: string }> = ({ 
-  title, value, icon: Icon, color, trend 
+interface DashboardProps {
+  userRole: UserRole;
+  currentDoctorId: string | null;
+  transactions: Transaction[];
+}
+
+const KPICard: React.FC<{ title: string; value: string; icon: React.ElementType; color: string; trend: string }> = ({
+  title, value, icon: Icon, color, trend
 }) => (
   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
     <div className="flex justify-between items-start">
@@ -27,13 +33,20 @@ const KPICard: React.FC<{ title: string; value: string; icon: React.ElementType;
   </div>
 );
 
-export const Dashboard: React.FC = () => {
+export const Dashboard: React.FC<DashboardProps> = ({ userRole, currentDoctorId, transactions }) => {
   // Mock calculations
   const totalPatients = MOCK_PATIENTS.length;
-  const totalRevenue = MOCK_TRANSACTIONS
+
+  // Filter transactions
+  const isDoctorView = userRole === 'doctor' && currentDoctorId;
+  const filteredTransactions = isDoctorView
+    ? transactions.filter(t => t.type !== 'income' || t.doctorId === currentDoctorId)
+    : transactions;
+
+  const totalRevenue = filteredTransactions
     .filter(t => t.type === 'income')
     .reduce((acc, curr) => acc + curr.amount, 0);
-  
+
   const disciplineData = Object.values(Discipline).map(d => ({
     name: d,
     value: Math.floor(Math.random() * 50) + 10 // Mock data generation
@@ -42,9 +55,9 @@ export const Dashboard: React.FC = () => {
   const COLORS = ['#1e40af', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'];
 
   const incomeVsExpenseData = [
-    { name: 'Ingresos', value: totalRevenue },
-    { name: 'Gastos', value: 207000 }, // Mock expense total
-  ];
+    { name: isDoctorView ? 'Mis Ingresos' : 'Ingresos', value: totalRevenue },
+    { name: 'Gastos Operativos', value: isDoctorView ? 0 : transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0) },
+  ].filter(d => d.value > 0);
 
   return (
     <div className="space-y-6">
@@ -55,31 +68,31 @@ export const Dashboard: React.FC = () => {
 
       {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KPICard 
-          title="Pacientes Activos" 
-          value={totalPatients.toString()} 
-          icon={Users} 
+        <KPICard
+          title="Pacientes Activos"
+          value={totalPatients.toString()}
+          icon={Users}
           color="bg-blue-600"
           trend="+12%"
         />
-        <KPICard 
-          title="Ingresos del Mes" 
-          value={`RD$ ${(totalRevenue).toLocaleString()}`} 
-          icon={DollarSign} 
+        <KPICard
+          title={isDoctorView ? "Mis Ingresos del Mes" : "Ingresos del Mes"}
+          value={`RD$ ${(totalRevenue).toLocaleString()}`}
+          icon={DollarSign}
           color="bg-green-600"
           trend="+8.5%"
         />
-        <KPICard 
-          title="Cirugías Pendientes" 
-          value="18" 
-          icon={Activity} 
+        <KPICard
+          title="Cirugías Pendientes"
+          value="18"
+          icon={Activity}
           color="bg-purple-600"
           trend="-2%"
         />
-        <KPICard 
-          title="Citas Hoy" 
-          value="42" 
-          icon={Calendar} 
+        <KPICard
+          title="Citas Hoy"
+          value="42"
+          icon={Calendar}
           color="bg-orange-500"
           trend="+5%"
         />
@@ -95,8 +108,8 @@ export const Dashboard: React.FC = () => {
               <BarChart data={disciplineData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
                 <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" width={120} tick={{fontSize: 12}} />
-                <Tooltip cursor={{fill: '#f8fafc'}} />
+                <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 12 }} />
+                <Tooltip cursor={{ fill: '#f8fafc' }} />
                 <Bar dataKey="value" fill="#1e40af" radius={[0, 4, 4, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
@@ -107,7 +120,7 @@ export const Dashboard: React.FC = () => {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
           <h3 className="text-lg font-bold text-slate-900 mb-4">Balance Financiero</h3>
           <div className="h-80 w-full flex items-center justify-center">
-             <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={incomeVsExpenseData}
@@ -124,7 +137,7 @@ export const Dashboard: React.FC = () => {
                   ))}
                 </Pie>
                 <Tooltip formatter={(value: number) => `RD$ ${value.toLocaleString()}`} />
-                <Legend verticalAlign="bottom" height={36}/>
+                <Legend verticalAlign="bottom" height={36} />
               </PieChart>
             </ResponsiveContainer>
           </div>

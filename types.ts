@@ -208,6 +208,7 @@ export interface Transaction {
   category: string;
   discipline?: Discipline;
   patientId?: string;
+  doctorId?: string; // Newly added to filter income per doctor
   status?: 'paid' | 'pending';
 }
 

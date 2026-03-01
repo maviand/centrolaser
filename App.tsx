@@ -14,10 +14,7 @@ import { Telehealth } from './components/Telehealth';
 import { SurgicalPlanner } from './components/SurgicalPlanner';
 import { Inventory } from './components/Inventory';
 import { Marketing } from './components/Marketing';
-import { Analytics } from './components/Analytics';
-import { PatientBilling } from './components/PatientBilling';
-import { ViewState, UserRole, Patient, Appointment } from './types';
-import { MOCK_PATIENTS, MOCK_APPOINTMENTS, SERVICES, DOCTOR_PROFILES } from './constants';
+import { MOCK_PATIENTS, MOCK_APPOINTMENTS, SERVICES, DOCTOR_PROFILES, MOCK_TRANSACTIONS } from './constants';
 import { Bell, Search, MessageCircle, Menu, User, BookOpen, X, Camera, Save, Shield, CreditCard, Phone, Mail, FileText, CheckCircle, AlertTriangle, Eye, Type } from 'lucide-react';
 
 import { FamilyManagement } from './components/FamilyManagement';
@@ -294,6 +291,7 @@ export default function App() {
   // Data State (Lifted for persistence between views)
   const [patients, setPatients] = useState<Patient[]>(MOCK_PATIENTS);
   const [appointments, setAppointments] = useState<Appointment[]>(MOCK_APPOINTMENTS);
+  const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
 
   // View State
   const [currentView, setCurrentView] = useState<ViewState>('dashboard');
@@ -398,7 +396,11 @@ export default function App() {
   const renderContent = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard
+          userRole={userRole}
+          currentDoctorId={currentDoctorId}
+          transactions={transactions}
+        />;
       case 'appointments':
         return <Appointments
           appointments={appointments}
@@ -420,7 +422,10 @@ export default function App() {
       case 'refractive-flow':
         return <RefractiveFlow patients={patients} onAddPatient={handleAddPatient} />;
       case 'accounting':
-        return <Accounting />;
+        return <Accounting
+          transactions={transactions}
+          setTransactions={setTransactions}
+        />;
       case 'telehealth':
         return <Telehealth />;
       case 'surgical-planner':
@@ -582,10 +587,10 @@ export default function App() {
                 <p className="text-xs text-slate-500 capitalize">{userRole}</p>
               </div>
               <div className={`relative w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center font-bold border overflow-hidden ${userRole === 'admin'
-                  ? 'bg-blue-100 text-blue-700 border-blue-200'
-                  : userRole === 'doctor'
-                    ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                    : 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                ? 'bg-blue-100 text-blue-700 border-blue-200'
+                : userRole === 'doctor'
+                  ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                  : 'bg-indigo-100 text-indigo-700 border-indigo-200'
                 }`}>
                 {userRole === 'patient' ? (
                   <img src={currentPatient.avatarUrl} alt="User" className="w-full h-full object-cover" />
