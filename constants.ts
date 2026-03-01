@@ -1,13 +1,99 @@
-import { Discipline, Patient, PatientStatus, Transaction, Service, Appointment } from './types';
+import { Discipline, Patient, PatientStatus, Transaction, Service, Appointment, DoctorProfile } from './types';
 
 export const LOGO_URL = "https://i.imgur.com/DE2gOJW.jpeg";
 
 export const DOCTORS = [
+  "Dr. Juan Batlle Pichardo",
   "Dr. Juan Batlle Logroño",
-  "Dra. María Pérez (Córnea)",
-  "Dr. José Rodríguez (Retina)",
-  "Dra. Laura Díaz (Pediatría)",
-  "Dr. Gernot Winkler"
+  "Dra. María Teresa Salazar",
+  "Dr. Gernot Winkler",
+  "Dr. Juan Ubiera",
+  "Dra. Adalgisa Corona",
+  "Dra. Rachel Alburquerque",
+  "Dr. Carlos Gómez",
+  "Dra. Antonina Paniagua",
+  "Dra. Maritza Mínguez",
+  "Dra. Elupina De León"
+];
+
+export const DOCTOR_PROFILES: DoctorProfile[] = [
+  {
+    id: "doc-1",
+    name: "Dr. Juan Batlle Pichardo",
+    specialties: ["Director Médico", "Cataratas", "Defectos Refractivos", "Neuro-oftalmología"],
+    bio: "El Dr. Juan Batlle Pichardo es Director Médico en Centro Láser, especialista en cataratas, defectos refractivos y neuro-oftalmología.",
+    url: "https://centrolaser.com.do/oftalmologos/dr-juan-batlle-pichardo/"
+  },
+  {
+    id: "doc-2",
+    name: "Dr. Juan Batlle Logroño",
+    specialties: ["Córnea", "Defectos Refractivos", "Cataratas"],
+    bio: "El Dr. Juan Batlle Logroño es especialista en córneas, defectos refractivos y cataratas, entre otras subespecialidades oftalmológicas.",
+    url: "https://centrolaser.com.do/oftalmologos/dr-juan-batlle-logrono/"
+  },
+  {
+    id: "doc-3",
+    name: "Dra. María Teresa Salazar",
+    specialties: ["Segmento Anterior", "Córnea", "Defectos Refractivos", "Cataratas"],
+    bio: "La oftalmóloga Dra. María Teresa Salazar es especialista en segmento anterior, córnea, defectos refractivos y cataratas, entre otras sub especialidades.",
+    url: "https://centrolaser.com.do/oftalmologos/dra-maria-teresa-salazar/"
+  },
+  {
+    id: "doc-4",
+    name: "Dr. Gernot Winkler",
+    specialties: ["Oftalmología Pediátrica", "Estrabismo", "Alergias Oculares"],
+    bio: "El Dr. Gernot Winkler destaca como oftalmólogo pediátrico, entre otras áreas se especializa en estrabismo, examen de niños prematuros, y alergias oculares.",
+    url: "https://centrolaser.com.do/oftalmologos/dr-gernot-winkler/"
+  },
+  {
+    id: "doc-5",
+    name: "Dr. Juan Ubiera",
+    specialties: ["Retina y Vítreo", "Retinopatía Diabética", "Cirugía de Cataratas"],
+    bio: "El Dr. Juan Ubiera destaca por su trabajo en retina y vítreo, retinopatía diabética, desprendimiento de retina, y cirugía de cataratas.",
+    url: "https://centrolaser.com.do/oftalmologos/dr-juan-l-ubiera/"
+  },
+  {
+    id: "doc-6",
+    name: "Dra. Adalgisa Corona",
+    specialties: ["Neuro-oftalmología", "Trastornos del Nervio Óptico"],
+    bio: "La Dra. Adalgisa Corona destaca por su especialización en neuro-oftalmología, y atención a trastornos del nervio óptico y esclerosis múltiple, entre otras.",
+    url: "https://centrolaser.com.do/oftalmologos/dra-adalgisa-corona/"
+  },
+  {
+    id: "doc-7",
+    name: "Dra. Rachel Alburquerque",
+    specialties: ["Glaucoma"],
+    bio: "La oftalmóloga, Dra. Rachel Alburquerque, es reconocida por su trabajo de investigación y tratamiento en el área del glaucoma.",
+    url: "https://centrolaser.com.do/oftalmologos/dra-rachel-alburquerque/"
+  },
+  {
+    id: "doc-8",
+    name: "Dr. Carlos Gómez",
+    specialties: ["Cataratas", "Corrección de Defectos Refractivos"],
+    bio: "El oftalmólogo, Dr. Carlos Gómez, es reconocido por su trabajo de investigación y tratamiento en el área de cataratas, y corrección de defectos refractivos.",
+    url: "https://centrolaser.com.do/oftalmologos/dr-carlos-gomez/"
+  },
+  {
+    id: "doc-9",
+    name: "Dra. Antonina Paniagua",
+    specialties: ["Oculoplastia", "Blefaroplastia"],
+    bio: "La Dra. Antonina Paniagua destaca en el área de la oculoplastia y el tratamiento de arrugas con uso de botox, ptosis palpebral y blefaroplastia.",
+    url: "https://centrolaser.com.do/oftalmologos/dra-antonina-paniagua/"
+  },
+  {
+    id: "doc-10",
+    name: "Dra. Maritza Mínguez",
+    specialties: ["Baja Visión", "Oftalmología General", "Refracciones"],
+    bio: "La Dra. Maritza Mínguez se especializa en el campo de la baja visión, que comprende la oftalmología general y refracciones especializadas, entre otras.",
+    url: "https://centrolaser.com.do/oftalmologos/dra-maritza-minguez/"
+  },
+  {
+    id: "doc-11",
+    name: "Dra. Elupina De León",
+    specialties: ["Oftalmología Pediátrica", "Lentes de Contacto", "Ecografía Ocular"],
+    bio: "La Dra. Elupina de León se especializa en oftalmología pediátrica, lentes de contacto, ecografía ocular y ultrabiomicroscopía (UBM), entre otras áreas.",
+    url: "https://centrolaser.com.do/oftalmologos/dra-elupina-de-leon/"
+  }
 ];
 
 export const SERVICES: Service[] = [
@@ -44,32 +130,32 @@ export const MOCK_PATIENTS: Patient[] = [
     policyNumber: '77382910',
     notes: 'Paciente masculino de 33 años. Chequeo de rutina.',
     medicalHistory: [
-      { 
-        id: 'EV-132313', 
-        date: '2026-02-05', 
+      {
+        id: 'EV-132313',
+        date: '2026-02-05',
         time: '15:10:00',
         eventNumber: '132313',
-        type: 'Seguimiento', 
-        title: 'Chequeo de Rutina', 
+        type: 'Seguimiento',
+        title: 'Chequeo de Rutina',
         doctor: 'Dr. Gernot Winkler',
         reason: 'Seguimiento - CHEQUEO DE RUTINA',
         currentIllness: 'Ninguna',
         analysisPlan: 'ISHIHARA 100% BIEN PRUEBA DE TITMUS 9/9 NO NECESITA LENTES EN ESTE MOMENTO RTC 1 AÑO',
         physicalExam: [
-            { name: 'Externo', od: 'Normal', oi: 'Normal' },
-            { name: 'P/P/L', od: 'Normal', oi: 'Normal' },
-            { name: 'Conjuntiva/Esclera', od: 'Normal', oi: 'Normal' },
-            { name: 'Córnea', od: 'Cornea clara', oi: 'Cornea clara' },
-            { name: 'Cámara anterior', od: 'Formada', oi: 'Formada' },
-            { name: 'Iris', od: 'Normal', oi: 'Normal' },
-            { name: 'Cristalino', od: 'Transparente', oi: 'Transparente' },
-            { name: 'Retina/Vítreo', od: 'Normal', oi: 'Normal' },
-            { name: 'Nervio óptico', od: 'Normal', oi: 'Normal' },
+          { name: 'Externo', od: 'Normal', oi: 'Normal' },
+          { name: 'P/P/L', od: 'Normal', oi: 'Normal' },
+          { name: 'Conjuntiva/Esclera', od: 'Normal', oi: 'Normal' },
+          { name: 'Córnea', od: 'Cornea clara', oi: 'Cornea clara' },
+          { name: 'Cámara anterior', od: 'Formada', oi: 'Formada' },
+          { name: 'Iris', od: 'Normal', oi: 'Normal' },
+          { name: 'Cristalino', od: 'Transparente', oi: 'Transparente' },
+          { name: 'Retina/Vítreo', od: 'Normal', oi: 'Normal' },
+          { name: 'Nervio óptico', od: 'Normal', oi: 'Normal' },
         ],
         diagnoses: [
-            { date: '18/11/2025', code: 'H162', description: 'Ojo Seco', eye: 'OU' },
-            { date: '22/01/2025', code: 'H521', description: 'Emetrope', eye: 'OU' },
-            { date: '05/02/2026', code: 'H522', description: 'Astigmatismo', eye: 'OU' }
+          { date: '18/11/2025', code: 'H162', description: 'Ojo Seco', eye: 'OU' },
+          { date: '22/01/2025', code: 'H521', description: 'Emetrope', eye: 'OU' },
+          { date: '05/02/2026', code: 'H522', description: 'Astigmatismo', eye: 'OU' }
         ]
       }
     ],
@@ -96,16 +182,16 @@ export const MOCK_PATIENTS: Patient[] = [
     policyNumber: 'HUM-8839201',
     notes: 'Paciente interesada en LASIK. Usuario de lentes de contacto blandos.',
     medicalHistory: [
-      { 
-        id: 'H-1', 
-        date: '2024-05-20', 
-        type: 'Consulta', 
-        title: 'Evaluación Inicial Refractiva', 
+      {
+        id: 'H-1',
+        date: '2024-05-20',
+        type: 'Consulta',
+        title: 'Evaluación Inicial Refractiva',
         doctor: 'Dr. Juan Batlle Logroño',
         reason: 'Interés en cirugía refractiva',
         currentIllness: 'Miopía progresiva desde la adolescencia. Intolerancia reciente a lentes de contacto.',
         analysisPlan: 'Paciente candidata para LASIK. Se programa topografía corneal.',
-        notes: 'Miopía -3.00 OD, -3.25 OI. Córnea apta para cirugía.' 
+        notes: 'Miopía -3.00 OD, -3.25 OI. Córnea apta para cirugía.'
       }
     ],
     communicationLogs: [
@@ -141,7 +227,7 @@ export const MOCK_PATIENTS: Patient[] = [
       }
     ],
     dryEyeAssessments: [
-        { id: 'DE-1', date: '2024-05-20', osdiScore: 12, symptoms: ['Fatiga visual leve'], severity: 'Normal' }
+      { id: 'DE-1', date: '2024-05-20', osdiScore: 12, symptoms: ['Fatiga visual leve'], severity: 'Normal' }
     ],
     auditLog: []
   },
@@ -162,34 +248,34 @@ export const MOCK_PATIENTS: Patient[] = [
     policyNumber: 'MAP-992811',
     notes: 'Programado para cirugía de catarata ojo derecho. Diabético tipo 2.',
     medicalHistory: [
-      { 
-        id: 'H-2', 
-        date: '2024-05-18', 
-        type: 'Consulta', 
-        title: 'Biometría Ocular', 
+      {
+        id: 'H-2',
+        date: '2024-05-18',
+        type: 'Consulta',
+        title: 'Biometría Ocular',
         doctor: 'Dr. Juan Batlle Logroño',
         reason: 'Cálculo de lente intraocular',
         analysisPlan: 'Se selecciona LIO Monofocal +21.0D. Se explica pronóstico visual.',
-        notes: 'Cálculo de LIO realizado.' 
+        notes: 'Cálculo de LIO realizado.'
       }
     ],
     communicationLogs: [],
     labResults: [],
     examinations: [
-       { id: 'E-3', date: '2024-05-18', examType: 'Biometría Óptica', summary: 'LIO Poder +21.0 D.', performedBy: 'Dr. José Rodríguez' }
+      { id: 'E-3', date: '2024-05-18', examType: 'Biometría Óptica', summary: 'LIO Poder +21.0 D.', performedBy: 'Dr. José Rodríguez' }
     ],
     procedures: [],
     aiScreenings: [
-        { 
-            id: 'AI-1', 
-            date: '2024-05-18', 
-            modality: 'Retinografía', 
-            riskLevel: 'Moderado', 
-            confidenceScore: 89, 
-            aiFindings: ['Microaneurismas en cuadrante superior', 'Exudados duros aislados'],
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Diabetic_Retinopathy.jpg',
-            status: 'Verified'
-        }
+      {
+        id: 'AI-1',
+        date: '2024-05-18',
+        modality: 'Retinografía',
+        riskLevel: 'Moderado',
+        confidenceScore: 89,
+        aiFindings: ['Microaneurismas en cuadrante superior', 'Exudados duros aislados'],
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Diabetic_Retinopathy.jpg',
+        status: 'Verified'
+      }
     ],
     auditLog: []
   },
@@ -212,7 +298,7 @@ export const MOCK_PATIENTS: Patient[] = [
     communicationLogs: [],
     labResults: [],
     examinations: [
-        { id: 'E-4', date: '2024-05-22', examType: 'Topografía Corneal', summary: 'Astigmatismo regular a favor de la regla.', performedBy: 'Tec. Luis Diaz' }
+      { id: 'E-4', date: '2024-05-22', examType: 'Topografía Corneal', summary: 'Astigmatismo regular a favor de la regla.', performedBy: 'Tec. Luis Diaz' }
     ],
     procedures: [],
     auditLog: []
@@ -256,15 +342,15 @@ export const MOCK_PATIENTS: Patient[] = [
     labResults: [],
     examinations: [],
     procedures: [
-        { id: 'PR-1', date: '2024-05-01', procedureName: 'Trasplante de Córnea', doctor: 'Dra. María Pérez', outcome: 'Exitoso', notes: 'Sin complicaciones intraoperatorias.' }
+      { id: 'PR-1', date: '2024-05-01', procedureName: 'Trasplante de Córnea', doctor: 'Dra. María Pérez', outcome: 'Exitoso', notes: 'Sin complicaciones intraoperatorias.' }
     ],
     auditLog: []
   },
 ];
 
 export const MOCK_APPOINTMENTS: Appointment[] = [
-    { id: 'APT-001', patientId: 'P-1002', patientName: 'Juan Perez', date: '2024-06-10', time: '09:00', reason: 'Cirugía Catarata OD', doctor: 'Dr. Juan Batlle Logroño', status: 'Scheduled', discipline: Discipline.Cataract },
-    { id: 'APT-002', patientId: 'P-1001', patientName: 'Rosa Martinez', date: '2024-06-12', time: '14:30', reason: 'Chequeo Pre-Quirúrgico', doctor: 'Dr. Juan Batlle Logroño', status: 'Scheduled', discipline: Discipline.Refractive },
+  { id: 'APT-001', patientId: 'P-1002', patientName: 'Juan Perez', date: '2024-06-10', time: '09:00', reason: 'Cirugía Catarata OD', doctor: 'Dr. Juan Batlle Logroño', status: 'Scheduled', discipline: Discipline.Cataract },
+  { id: 'APT-002', patientId: 'P-1001', patientName: 'Rosa Martinez', date: '2024-06-12', time: '14:30', reason: 'Chequeo Pre-Quirúrgico', doctor: 'Dr. Juan Batlle Logroño', status: 'Scheduled', discipline: Discipline.Refractive },
 ];
 
 export const MOCK_TRANSACTIONS: Transaction[] = [

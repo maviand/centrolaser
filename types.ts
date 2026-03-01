@@ -19,6 +19,15 @@ export enum PatientStatus {
   Discharged = "De Alta"
 }
 
+export interface DoctorProfile {
+  id: string;
+  name: string;
+  specialties: string[];
+  bio: string;
+  imageUrl?: string;
+  url: string;
+}
+
 export interface Diagnosis {
   date: string;
   code: string; // CIE-10
@@ -40,20 +49,20 @@ export interface MedicalRecord {
   type: 'Consulta' | 'Cirugía' | 'Seguimiento';
   title: string;
   doctor: string;
-  
+
   // Clinical Data
   reason?: string; // Motivo consulta
   currentIllness?: string; // Enfermedad actual
   analysisPlan?: string; // Análisis y plan
-  
+
   // Structured Exam
   physicalExam?: PhysicalExamField[];
-  
+
   // Diagnoses
   diagnoses?: Diagnosis[];
-  
+
   // Legacy notes field
-  notes?: string; 
+  notes?: string;
 }
 
 export interface LabResult {
@@ -138,7 +147,7 @@ export interface VisualAcuity {
 
 export interface Patient {
   id: string;
-  cedula?: string; 
+  cedula?: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -159,7 +168,7 @@ export interface Patient {
   procedures: ProcedureLog[];
   prescriptions?: Prescription[];
   visualAcuityHistory?: VisualAcuity[];
-  aiScreenings?: AIScreening[]; 
+  aiScreenings?: AIScreening[];
   dryEyeAssessments?: DryEyeAssessment[];
   auditLog: AuditLogEntry[]; // New field for tracking changes
   notes?: string;
@@ -197,14 +206,14 @@ export interface Transaction {
   type: 'income' | 'expense';
   category: string;
   discipline?: Discipline;
-  patientId?: string; 
+  patientId?: string;
   status?: 'paid' | 'pending';
 }
 
 export interface KPI {
   label: string;
   value: string | number;
-  change: number; 
+  change: number;
   trend: 'up' | 'down' | 'neutral';
 }
 
