@@ -4,7 +4,7 @@ import { LOGO_URL, DOCTOR_PROFILES } from '../constants';
 import { Shield, Stethoscope, User, CheckCircle, Mail, Lock, AlertCircle } from 'lucide-react';
 
 interface AuthScreenProps {
-  onLogin: (role: UserRole) => void;
+  onLogin: (role: UserRole, doctorId?: string) => void;
 }
 
 export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
@@ -33,7 +33,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
     if (selectedRole === 'doctor') {
       const doctor = DOCTOR_PROFILES.find(d => d.email.toLowerCase() === email.toLowerCase());
       if (doctor && password === '123456') {
-        onLogin(selectedRole);
+        onLogin(selectedRole, doctor.id);
       } else {
         setError('Credenciales de doctor incorrectas');
       }
@@ -150,8 +150,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
             <button
               onClick={handleLoginClick}
               className={`w-full text-white font-bold py-3 md:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 transform duration-100 ${selectedRole === 'admin' ? 'bg-blue-600 hover:bg-blue-700' :
-                  selectedRole === 'doctor' ? 'bg-emerald-600 hover:bg-emerald-700' :
-                    'bg-indigo-600 hover:bg-indigo-700'
+                selectedRole === 'doctor' ? 'bg-emerald-600 hover:bg-emerald-700' :
+                  'bg-indigo-600 hover:bg-indigo-700'
                 }`}
             >
               Entrar al Sistema
