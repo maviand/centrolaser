@@ -22,77 +22,88 @@ export const DOCTOR_PROFILES: DoctorProfile[] = [
     name: "Dr. Juan Batlle Pichardo",
     specialties: ["Director Médico", "Cataratas", "Defectos Refractivos", "Neuro-oftalmología"],
     bio: "El Dr. Juan Batlle Pichardo es Director Médico en Centro Láser, especialista en cataratas, defectos refractivos y neuro-oftalmología.",
-    url: "https://centrolaser.com.do/oftalmologos/dr-juan-batlle-pichardo/"
+    url: "https://centrolaser.com.do/oftalmologos/dr-juan-batlle-pichardo/",
+    email: "jbatllep@centrolaser.com.do"
   },
   {
     id: "doc-2",
     name: "Dr. Juan Batlle Logroño",
     specialties: ["Córnea", "Defectos Refractivos", "Cataratas"],
     bio: "El Dr. Juan Batlle Logroño es especialista en córneas, defectos refractivos y cataratas, entre otras subespecialidades oftalmológicas.",
-    url: "https://centrolaser.com.do/oftalmologos/dr-juan-batlle-logrono/"
+    url: "https://centrolaser.com.do/oftalmologos/dr-juan-batlle-logrono/",
+    email: "jbatllel@centrolaser.com.do"
   },
   {
     id: "doc-3",
     name: "Dra. María Teresa Salazar",
     specialties: ["Segmento Anterior", "Córnea", "Defectos Refractivos", "Cataratas"],
     bio: "La oftalmóloga Dra. María Teresa Salazar es especialista en segmento anterior, córnea, defectos refractivos y cataratas, entre otras sub especialidades.",
-    url: "https://centrolaser.com.do/oftalmologos/dra-maria-teresa-salazar/"
+    url: "https://centrolaser.com.do/oftalmologos/dra-maria-teresa-salazar/",
+    email: "msalazar@centrolaser.com.do"
   },
   {
     id: "doc-4",
     name: "Dr. Gernot Winkler",
     specialties: ["Oftalmología Pediátrica", "Estrabismo", "Alergias Oculares"],
     bio: "El Dr. Gernot Winkler destaca como oftalmólogo pediátrico, entre otras áreas se especializa en estrabismo, examen de niños prematuros, y alergias oculares.",
-    url: "https://centrolaser.com.do/oftalmologos/dr-gernot-winkler/"
+    url: "https://centrolaser.com.do/oftalmologos/dr-gernot-winkler/",
+    email: "gwinkler@centrolaser.com.do"
   },
   {
     id: "doc-5",
     name: "Dr. Juan Ubiera",
     specialties: ["Retina y Vítreo", "Retinopatía Diabética", "Cirugía de Cataratas"],
     bio: "El Dr. Juan Ubiera destaca por su trabajo en retina y vítreo, retinopatía diabética, desprendimiento de retina, y cirugía de cataratas.",
-    url: "https://centrolaser.com.do/oftalmologos/dr-juan-l-ubiera/"
+    url: "https://centrolaser.com.do/oftalmologos/dr-juan-l-ubiera/",
+    email: "jubiera@centrolaser.com.do"
   },
   {
     id: "doc-6",
     name: "Dra. Adalgisa Corona",
     specialties: ["Neuro-oftalmología", "Trastornos del Nervio Óptico"],
     bio: "La Dra. Adalgisa Corona destaca por su especialización en neuro-oftalmología, y atención a trastornos del nervio óptico y esclerosis múltiple, entre otras.",
-    url: "https://centrolaser.com.do/oftalmologos/dra-adalgisa-corona/"
+    url: "https://centrolaser.com.do/oftalmologos/dra-adalgisa-corona/",
+    email: "acorona@centrolaser.com.do"
   },
   {
     id: "doc-7",
     name: "Dra. Rachel Alburquerque",
     specialties: ["Glaucoma"],
     bio: "La oftalmóloga, Dra. Rachel Alburquerque, es reconocida por su trabajo de investigación y tratamiento en el área del glaucoma.",
-    url: "https://centrolaser.com.do/oftalmologos/dra-rachel-alburquerque/"
+    url: "https://centrolaser.com.do/oftalmologos/dra-rachel-alburquerque/",
+    email: "ralburquerque@centrolaser.com.do"
   },
   {
     id: "doc-8",
     name: "Dr. Carlos Gómez",
     specialties: ["Cataratas", "Corrección de Defectos Refractivos"],
     bio: "El oftalmólogo, Dr. Carlos Gómez, es reconocido por su trabajo de investigación y tratamiento en el área de cataratas, y corrección de defectos refractivos.",
-    url: "https://centrolaser.com.do/oftalmologos/dr-carlos-gomez/"
+    url: "https://centrolaser.com.do/oftalmologos/dr-carlos-gomez/",
+    email: "cgomez@centrolaser.com.do"
   },
   {
     id: "doc-9",
     name: "Dra. Antonina Paniagua",
     specialties: ["Oculoplastia", "Blefaroplastia"],
     bio: "La Dra. Antonina Paniagua destaca en el área de la oculoplastia y el tratamiento de arrugas con uso de botox, ptosis palpebral y blefaroplastia.",
-    url: "https://centrolaser.com.do/oftalmologos/dra-antonina-paniagua/"
+    url: "https://centrolaser.com.do/oftalmologos/dra-antonina-paniagua/",
+    email: "apaniagua@centrolaser.com.do"
   },
   {
     id: "doc-10",
     name: "Dra. Maritza Mínguez",
     specialties: ["Baja Visión", "Oftalmología General", "Refracciones"],
     bio: "La Dra. Maritza Mínguez se especializa en el campo de la baja visión, que comprende la oftalmología general y refracciones especializadas, entre otras.",
-    url: "https://centrolaser.com.do/oftalmologos/dra-maritza-minguez/"
+    url: "https://centrolaser.com.do/oftalmologos/dra-maritza-minguez/",
+    email: "mminguez@centrolaser.com.do"
   },
   {
     id: "doc-11",
     name: "Dra. Elupina De León",
     specialties: ["Oftalmología Pediátrica", "Lentes de Contacto", "Ecografía Ocular"],
     bio: "La Dra. Elupina de León se especializa en oftalmología pediátrica, lentes de contacto, ecografía ocular y ultrabiomicroscopía (UBM), entre otras áreas.",
-    url: "https://centrolaser.com.do/oftalmologos/dra-elupina-de-leon/"
+    url: "https://centrolaser.com.do/oftalmologos/dra-elupina-de-leon/",
+    email: "edeleon@centrolaser.com.do"
   }
 ];
 

@@ -26,6 +26,7 @@ export interface DoctorProfile {
   bio: string;
   imageUrl?: string;
   url: string;
+  email: string;
 }
 
 export interface Diagnosis {
