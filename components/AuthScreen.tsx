@@ -30,6 +30,24 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
       return;
     }
 
+    if (selectedRole === 'accounting') {
+      if (email === 'contabilidad@centrolaser.com.do' && password === '123456') {
+        onLogin(selectedRole);
+      } else {
+        setError('Credenciales de contabilidad incorrectas');
+      }
+      return;
+    }
+
+    if (selectedRole === 'callcenter') {
+      if (email === 'callcenter@centrolaser.com.do' && password === '123456') {
+        onLogin(selectedRole);
+      } else {
+        setError('Credenciales de call center incorrectas');
+      }
+      return;
+    }
+
     if (selectedRole === 'doctor') {
       const doctor = DOCTOR_PROFILES.find(d => d.email.toLowerCase() === email.toLowerCase());
       if (doctor && password === '123456') {
@@ -112,9 +130,37 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
               </div>
               {selectedRole === 'admin' && <CheckCircle className="text-blue-600 ml-2 shrink-0" size={18} />}
             </button>
+
+            <button
+              onClick={() => handleRoleChange('accounting')}
+              className={`w-full group relative flex items-center p-3 md:p-4 border rounded-xl transition-all text-left ${selectedRole === 'accounting' ? 'border-orange-500 bg-orange-50 shadow-md ring-1 ring-orange-500' : 'border-slate-200 hover:border-orange-300'}`}
+            >
+              <div className={`p-2 md:p-3 rounded-lg mr-3 md:mr-4 transition-colors shrink-0 ${selectedRole === 'accounting' ? 'bg-orange-100' : 'bg-slate-100 group-hover:bg-orange-50'}`}>
+                <Lock className={selectedRole === 'accounting' ? 'text-orange-600' : 'text-slate-500'} size={20} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className={`font-bold text-sm md:text-base truncate ${selectedRole === 'accounting' ? 'text-orange-800' : 'text-slate-900'}`}>Contabilidad</h3>
+                <p className="text-xs text-slate-500 truncate">Gestión financiera y ARS.</p>
+              </div>
+              {selectedRole === 'accounting' && <CheckCircle className="text-orange-600 ml-2 shrink-0" size={18} />}
+            </button>
+
+            <button
+              onClick={() => handleRoleChange('callcenter')}
+              className={`w-full group relative flex items-center p-3 md:p-4 border rounded-xl transition-all text-left ${selectedRole === 'callcenter' ? 'border-purple-500 bg-purple-50 shadow-md ring-1 ring-purple-500' : 'border-slate-200 hover:border-purple-300'}`}
+            >
+              <div className={`p-2 md:p-3 rounded-lg mr-3 md:mr-4 transition-colors shrink-0 ${selectedRole === 'callcenter' ? 'bg-purple-100' : 'bg-slate-100 group-hover:bg-purple-50'}`}>
+                <User className={selectedRole === 'callcenter' ? 'text-purple-600' : 'text-slate-500'} size={20} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className={`font-bold text-sm md:text-base truncate ${selectedRole === 'callcenter' ? 'text-purple-800' : 'text-slate-900'}`}>Call Center</h3>
+                <p className="text-xs text-slate-500 truncate">Soporte y gestión de citas.</p>
+              </div>
+              {selectedRole === 'callcenter' && <CheckCircle className="text-purple-600 ml-2 shrink-0" size={18} />}
+            </button>
           </div>
 
-          {(selectedRole === 'doctor' || selectedRole === 'admin') && (
+          {(selectedRole === 'doctor' || selectedRole === 'admin' || selectedRole === 'accounting' || selectedRole === 'callcenter') && (
             <div className="mt-6 flex flex-col space-y-4 animate-in slide-in-from-bottom-2 fade-in duration-200">
               {error && (
                 <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg text-sm border border-red-200">
@@ -150,8 +196,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
             <button
               onClick={handleLoginClick}
               className={`w-full text-white font-bold py-3 md:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 transform duration-100 ${selectedRole === 'admin' ? 'bg-blue-600 hover:bg-blue-700' :
-                selectedRole === 'doctor' ? 'bg-emerald-600 hover:bg-emerald-700' :
-                  'bg-indigo-600 hover:bg-indigo-700'
+                  selectedRole === 'accounting' ? 'bg-orange-600 hover:bg-orange-700' :
+                    selectedRole === 'callcenter' ? 'bg-purple-600 hover:bg-purple-700' :
+                      selectedRole === 'doctor' ? 'bg-emerald-600 hover:bg-emerald-700' :
+                        'bg-indigo-600 hover:bg-indigo-700'
                 }`}
             >
               Entrar al Sistema

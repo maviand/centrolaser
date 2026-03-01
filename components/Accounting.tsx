@@ -5,7 +5,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { Discipline, Transaction } from '../types';
 import { MOCK_PATIENTS, SERVICES } from '../constants';
 
-type Tab = 'overview' | 'expenses' | 'reports' | 'ars-scrubbing' | 'payment-plans';
+type Tab = 'overview' | 'expenses' | 'reports' | 'ars-scrubbing' | 'payment-plans' | 'doctor-payouts' | 'client-statements';
 
 interface AccountingProps {
     transactions: Transaction[];
@@ -135,6 +135,18 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                         className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap ${activeTab === 'payment-plans' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
                     >
                         Planes de Pago
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('client-statements')}
+                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap ${activeTab === 'client-statements' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+                    >
+                        Estados de Cuenta (Pacientes)
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('doctor-payouts')}
+                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap ${activeTab === 'doctor-payouts' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+                    >
+                        Pagos a Médicos
                     </button>
                     <button
                         onClick={() => setActiveTab('reports')}
@@ -503,7 +515,97 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                 </div>
             )}
 
-            {/* New Expense Modal */}
+            {/* --- TAB: DOCTOR PAYOUTS --- */}
+            {activeTab === 'doctor-payouts' && (
+                <div className="space-y-6 overflow-y-auto pr-2 pb-4">
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">Liquidación a Médicos</h3>
+                                <p className="text-sm text-slate-500">Montos adeudados a cada especialista por procedimientos realizados.</p>
+                            </div>
+                        </div>
+
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
+                                    <th className="p-4 font-medium">Médico</th>
+                                    <th className="p-4 font-medium text-right">Procedimientos Realizados</th>
+                                    <th className="p-4 font-medium text-right">Total Generado</th>
+                                    <th className="p-4 font-medium text-right">Monto a Liquidar (Honorarios)</th>
+                                    <th className="p-4 font-medium text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {[
+                                    { doctor: 'Dr. Roberto Lora', procedures: 12, generated: 240000, payout: 144000 },
+                                    { doctor: 'Dra. Ana Peña', procedures: 8, generated: 160000, payout: 96000 },
+                                    { doctor: 'Dr. Carlos Mendez', procedures: 15, generated: 300000, payout: 180000 },
+                                ].map((payout, idx) => (
+                                    <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                        <td className="p-4 font-medium text-slate-800">{payout.doctor}</td>
+                                        <td className="p-4 text-sm text-slate-600 text-right">{payout.procedures}</td>
+                                        <td className="p-4 text-sm text-slate-800 text-right">RD$ {payout.generated.toLocaleString()}</td>
+                                        <td className="p-4 font-bold text-blue-700 text-right">RD$ {payout.payout.toLocaleString()}</td>
+                                        <td className="p-4 text-center">
+                                            <button className="bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-md text-xs font-bold transition-colors">
+                                                Liquidar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* --- TAB: CLIENT STATEMENTS --- */}
+            {activeTab === 'client-statements' && (
+                <div className="space-y-6 overflow-y-auto pr-2 pb-4">
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">Estados de Cuenta de Pacientes</h3>
+                                <p className="text-sm text-slate-500">Balances pendientes por paciente y facturación detallada.</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4">
+                            {MOCK_PATIENTS.filter(p => p.balance > 0).map(patient => (
+                                <div key={patient.id} className="border border-slate-200 rounded-lg p-4 flex flex-col md:flex-row justify-between items-center gap-4 hover:shadow-md transition-shadow bg-slate-50/50">
+                                    <div className="flex items-center gap-4 w-full md:w-1/3">
+                                        <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg border border-blue-200">
+                                            {patient.firstName.charAt(0)}{patient.lastName.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-800">{patient.firstName} {patient.lastName}</h4>
+                                            <p className="text-xs text-slate-500">ID: {patient.id} • {patient.phone}</p>
+                                        </div>
+                                    </div>
+                                    <div className="w-full md:w-1/3 text-center md:text-left">
+                                        <p className="text-xs text-slate-500 uppercase font-bold tracking-wide">Balance Pendiente</p>
+                                        <p className="text-xl font-bold text-red-600">RD$ {patient.balance.toLocaleString()}</p>
+                                    </div>
+                                    <div className="w-full md:w-1/3 flex gap-2 justify-end">
+                                        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
+                                            <FileText size={16} /> Ver Detalle
+                                        </button>
+                                        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors">
+                                            <CreditCard size={16} /> Registrar Pago
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                            {MOCK_PATIENTS.filter(p => p.balance > 0).length === 0 && (
+                                <div className="text-center p-8 text-slate-500 bg-slate-50 rounded-lg border border-slate-200 border-dashed">
+                                    No hay pacientes con balances pendientes actualmente.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
             {showExpenseModal && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in duration-200">

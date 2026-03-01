@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Patient, Appointment, Transaction, UserRole, ViewState } from './types';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { PatientManager } from './components/PatientManager';
@@ -321,6 +322,8 @@ export default function App() {
       // For demo, we default to P-1001 (Rosa)
       setCurrentPatientId('P-1001');
     }
+    else if (role === 'callcenter') setCurrentView('crm');
+    else if (role === 'accounting') setCurrentView('accounting');
     else setCurrentView('dashboard');
   };
 
@@ -435,9 +438,9 @@ export default function App() {
       case 'marketing':
         return <Marketing />;
       case 'analytics':
-        return <Analytics />;
+        return <div>Analytics Component (To be implemented)</div>;
       case 'patient-billing':
-        return <PatientBilling currentPatientId={currentPatientId} />;
+        return <div>Patient Billing Component (To be implemented)</div>;
       // Patient Portal Views
       case 'my-health':
         return <MyHealth patient={currentPatient} />;
@@ -582,20 +585,20 @@ export default function App() {
             >
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-bold text-slate-800 group-hover:text-blue-700 transition-colors">
-                  {userRole === 'patient' ? `${currentPatient.firstName} ${currentPatient.lastName}` : (userRole === 'admin' ? 'Administrador' : (currentDoctorId ? DOCTOR_PROFILES.find(d => d.id === currentDoctorId)?.name : 'Dr. Especialista'))}
+                  {userRole === 'patient' ? `${currentPatient.firstName} ${currentPatient.lastName}` : (userRole === 'admin' ? 'Administrador' : userRole === 'callcenter' ? 'Call Center' : userRole === 'accounting' ? 'Contabilidad' : (currentDoctorId ? DOCTOR_PROFILES.find(d => d.id === currentDoctorId)?.name : 'Dr. Especialista'))}
                 </p>
                 <p className="text-xs text-slate-500 capitalize">{userRole}</p>
               </div>
-              <div className={`relative w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center font-bold border overflow-hidden ${userRole === 'admin'
+              <div className={`relative w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center font-bold border overflow-hidden ${userRole === 'admin' || userRole === 'accounting'
                 ? 'bg-blue-100 text-blue-700 border-blue-200'
-                : userRole === 'doctor'
+                : userRole === 'doctor' || userRole === 'callcenter'
                   ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
                   : 'bg-indigo-100 text-indigo-700 border-indigo-200'
                 }`}>
                 {userRole === 'patient' ? (
                   <img src={currentPatient.avatarUrl} alt="User" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-xs md:text-sm">{userRole === 'admin' ? 'AD' : (currentDoctorId ? DOCTOR_PROFILES.find(d => d.id === currentDoctorId)?.name.substring(0, 2).toUpperCase() : 'DE')}</span>
+                  <span className="text-xs md:text-sm">{userRole === 'admin' ? 'AD' : userRole === 'callcenter' ? 'CC' : userRole === 'accounting' ? 'CO' : (currentDoctorId ? DOCTOR_PROFILES.find(d => d.id === currentDoctorId)?.name.substring(0, 2).toUpperCase() : 'DE')}</span>
                 )}
                 {userRole === 'patient' && (
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
@@ -637,6 +640,6 @@ export default function App() {
           <EmergencyTriage onClose={() => setIsEmergencyModalOpen(false)} />
         )}
       </main>
-    </div>
+    </div >
   );
 }

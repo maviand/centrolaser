@@ -13,23 +13,23 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, userRole, onLogout, isOpen, onClose }) => {
-  
+
   const allNavItems = [
     // Admin / Doctor Items
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'doctor'] },
-    { id: 'appointments', label: 'Citas', icon: Calendar, roles: ['admin', 'doctor'] },
-    { id: 'crm', label: 'Pacientes (EMR)', icon: Users, roles: ['admin', 'doctor'] },
-    { id: 'triage-inbox', label: 'Bandeja de Triaje', icon: Inbox, roles: ['admin', 'doctor'] },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'doctor', 'callcenter', 'accounting'] },
+    { id: 'appointments', label: 'Citas', icon: Calendar, roles: ['admin', 'doctor', 'callcenter'] },
+    { id: 'crm', label: 'Pacientes (EMR)', icon: Users, roles: ['admin', 'doctor', 'callcenter'] },
+    { id: 'triage-inbox', label: 'Bandeja de Triaje', icon: Inbox, roles: ['admin', 'doctor', 'callcenter'] },
     { id: 'colleague-consults', label: 'Consultas Médicas', icon: MessageSquare, roles: ['admin', 'doctor'] },
     { id: 'surgical-planner', label: 'Planificador Quirúrgico', icon: Stethoscope, roles: ['admin', 'doctor'] },
     { id: 'refractive-flow', label: 'Flujo & Triaje', icon: Activity, roles: ['admin', 'doctor'] },
-    { id: 'telehealth', label: 'Telemedicina', icon: Video, roles: ['admin', 'doctor', 'patient'] },
-    { id: 'accounting', label: 'Contabilidad & ARS', icon: DollarSign, roles: ['admin'] },
+    { id: 'telehealth', label: 'Telemedicina', icon: Video, roles: ['admin', 'doctor', 'patient', 'callcenter'] },
+    { id: 'accounting', label: 'Contabilidad & ARS', icon: DollarSign, roles: ['admin', 'accounting'] },
     { id: 'inventory', label: 'Inventario', icon: Package, roles: ['admin'] },
     { id: 'marketing', label: 'Marketing & CRM', icon: Megaphone, roles: ['admin'] },
-    { id: 'analytics', label: 'Analítica & BI', icon: Activity, roles: ['admin'] },
+    { id: 'analytics', label: 'Analítica & BI', icon: Activity, roles: ['admin', 'accounting'] },
     { id: 'security', label: 'Seguridad & Accesos', icon: ShieldCheck, roles: ['admin'] },
-    
+
     // Patient Items
     { id: 'my-health', label: 'Mi Historial', icon: HeartPulse, roles: ['patient'] },
     { id: 'appointments', label: 'Mis Citas', icon: Calendar, roles: ['patient'] },
@@ -38,9 +38,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, use
     { id: 'ars-concierge', label: 'Autorizaciones ARS', icon: ShieldCheck, roles: ['patient'] },
     { id: 'optical-shop', label: 'Óptica Virtual', icon: Glasses, roles: ['patient'] },
     { id: 'medications', label: 'Mis Gotas & Recetas', icon: Pill, roles: ['patient'] },
-    
+
     // Shared - Moved here to appear after Appointments for Patient view
-    { id: 'services', label: 'Catálogo Servicios', icon: BookOpen, roles: ['admin', 'doctor', 'patient'] },
+    { id: 'services', label: 'Catálogo Servicios', icon: BookOpen, roles: ['admin', 'doctor', 'patient', 'callcenter', 'accounting'] },
 
     { id: 'education', label: 'Educación & Cuidados', icon: FileText, roles: ['patient'] },
     { id: 'faq', label: 'Preguntas Frecuentes', icon: HelpCircle, roles: ['patient'] },
@@ -52,9 +52,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, use
     <>
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
-            className="fixed inset-0 bg-black/50 z-20 md:hidden"
-            onClick={onClose}
+        <div
+          className="fixed inset-0 bg-black/50 z-20 md:hidden"
+          onClick={onClose}
         />
       )}
 
@@ -66,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, use
         <div className="p-6 flex items-center gap-3 border-b border-slate-800 justify-between">
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center p-1 overflow-hidden shrink-0">
-                <img src={LOGO_URL} alt="Centro Laser Logo" className="object-contain w-full h-full" />
+              <img src={LOGO_URL} alt="Centro Laser Logo" className="object-contain w-full h-full" />
             </div>
             <div className="overflow-hidden">
               <h1 className="font-bold text-lg leading-tight truncate">Centro Laser</h1>
@@ -86,11 +86,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, use
               <button
                 key={item.id}
                 onClick={() => onChangeView(item.id as ViewState)}
-                className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group ${
-                  isActive 
-                    ? 'bg-blue-700 text-white shadow-md' 
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group ${isActive
+                    ? 'bg-blue-700 text-white shadow-md'
                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                }`}
+                  }`}
               >
                 <item.icon size={20} className={isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'} />
                 <span className="font-medium text-sm">{item.label}</span>
@@ -100,7 +99,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, use
         </nav>
 
         <div className="p-4 border-t border-slate-800">
-          <button 
+          <button
             onClick={onLogout}
             className="w-full flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-red-400 transition-colors rounded-lg hover:bg-slate-800"
           >

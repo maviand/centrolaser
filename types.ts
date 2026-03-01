@@ -219,6 +219,6 @@ export interface KPI {
   trend: 'up' | 'down' | 'neutral';
 }
 
-export type UserRole = 'admin' | 'doctor' | 'patient';
+export type UserRole = 'patient' | 'doctor' | 'admin' | 'accounting' | 'callcenter';
 
 export type ViewState = 'dashboard' | 'crm' | 'appointments' | 'refractive-flow' | 'accounting' | 'services' | 'settings' | 'my-health' | 'education' | 'faq' | 'telehealth' | 'surgical-planner' | 'inventory' | 'marketing' | 'patient-billing' | 'family-management' | 'ars-concierge' | 'optical-shop' | 'medications' | 'triage-inbox' | 'colleague-consults' | 'security' | 'analytics';
