@@ -67,11 +67,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 to-blue-900 flex items-center justify-center p-4 md:p-6 overflow-y-auto">
-      <div className="max-w-4xl w-full bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden my-auto">
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 to-blue-900 flex items-center justify-center p-4 md:p-6 overflow-hidden">
+      <div className="max-w-4xl w-full bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden max-h-[95vh] my-auto">
 
         {/* Left Side: Brand */}
-        <div className="md:w-1/2 p-6 md:p-12 flex flex-col items-center justify-center bg-slate-50 border-b md:border-b-0 md:border-r border-slate-100 shrink-0">
+        <div className="md:w-1/2 p-6 md:p-8 lg:p-12 flex flex-col items-center justify-center bg-slate-50 border-b md:border-b-0 md:border-r border-slate-100 shrink-0">
           <div className="w-16 h-16 md:w-32 md:h-32 bg-white rounded-2xl shadow-lg p-2 mb-4 md:mb-8 flex items-center justify-center shrink-0">
             <img src={LOGO_URL} alt="Centro Laser" className="object-contain w-full h-full" />
           </div>
@@ -85,10 +85,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
         </div>
 
         {/* Right Side: Role Selection */}
-        <div className="md:w-1/2 p-6 md:p-12 flex flex-col justify-center bg-white">
-          <h2 className="text-lg md:text-xl font-bold text-slate-900 mb-4 md:mb-6 text-center md:text-left">Seleccione su perfil</h2>
+        <div className="md:w-1/2 p-6 md:p-8 lg:p-12 flex flex-col justify-start md:justify-center bg-white overflow-y-auto flex-1 min-h-0 custom-scrollbar">
+          <h2 className="text-lg md:text-xl font-bold text-slate-900 mb-4 md:mb-6 text-center md:text-left shrink-0">Seleccione su perfil</h2>
 
-          <div className="space-y-3 md:space-y-4 flex-1">
+          <div className="space-y-2 md:space-y-3 lg:space-y-4 shrink-0">
             <button
               onClick={() => handleRoleChange('patient')}
               className={`w-full group relative flex items-center p-3 md:p-4 border rounded-xl transition-all text-left ${selectedRole === 'patient' ? 'border-indigo-500 bg-indigo-50 shadow-md ring-1 ring-indigo-500' : 'border-slate-200 hover:border-indigo-300'}`}
@@ -161,7 +161,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
           </div>
 
           {(selectedRole === 'doctor' || selectedRole === 'admin' || selectedRole === 'accounting' || selectedRole === 'callcenter') && (
-            <div className="mt-6 flex flex-col space-y-4 animate-in slide-in-from-bottom-2 fade-in duration-200">
+            <div className="mt-4 md:mt-6 flex flex-col space-y-3 md:space-y-4 animate-in slide-in-from-bottom-2 fade-in duration-200 shrink-0">
               {error && (
                 <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg text-sm border border-red-200">
                   <AlertCircle size={16} />
@@ -192,14 +192,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
             </div>
           )}
 
-          <div className="mt-6 md:mt-8 pt-2 md:pt-0 shrink-0">
+          <div className="mt-4 md:mt-8 pt-2 md:pt-0 shrink-0">
             <button
               onClick={handleLoginClick}
               className={`w-full text-white font-bold py-3 md:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 transform duration-100 ${selectedRole === 'admin' ? 'bg-blue-600 hover:bg-blue-700' :
-                  selectedRole === 'accounting' ? 'bg-orange-600 hover:bg-orange-700' :
-                    selectedRole === 'callcenter' ? 'bg-purple-600 hover:bg-purple-700' :
-                      selectedRole === 'doctor' ? 'bg-emerald-600 hover:bg-emerald-700' :
-                        'bg-indigo-600 hover:bg-indigo-700'
+                selectedRole === 'accounting' ? 'bg-orange-600 hover:bg-orange-700' :
+                  selectedRole === 'callcenter' ? 'bg-purple-600 hover:bg-purple-700' :
+                    selectedRole === 'doctor' ? 'bg-emerald-600 hover:bg-emerald-700' :
+                      'bg-indigo-600 hover:bg-indigo-700'
                 }`}
             >
               Entrar al Sistema
