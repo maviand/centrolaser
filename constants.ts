@@ -1,5 +1,4 @@
-import { Discipline, Patient, PatientStatus, Transaction, Service, Appointment, DoctorProfile } from './types';
-
+import { Discipline, Patient, PatientStatus, Transaction, Service, Appointment, DoctorProfile, ArsClaimBatch, Glosa, TillReconciliation } from './types';
 export const LOGO_URL = "https://i.imgur.com/DE2gOJW.jpeg";
 
 export const DOCTORS = [
@@ -365,13 +364,26 @@ export const MOCK_APPOINTMENTS: Appointment[] = [
 ];
 
 export const MOCK_TRANSACTIONS: Transaction[] = [
-  { id: 'T-001', date: '2024-05-20', description: 'Consulta Inicial - Rosa Martinez', amount: 3500, type: 'income', category: 'Consultas', discipline: Discipline.Refractive, patientId: 'P-1001', doctorId: 'doc-2' },
-  { id: 'T-002', date: '2024-05-20', description: 'Compra Insumos Quirúrgicos', amount: 150000, type: 'expense', category: 'Insumos' },
-  { id: 'T-003', date: '2024-05-21', description: 'Cirugía Catarata - Juan Perez', amount: 85000, type: 'income', category: 'Cirugía', discipline: Discipline.Cataract, patientId: 'P-1002', doctorId: 'doc-2' },
-  { id: 'T-004', date: '2024-05-21', description: 'Pago Servicios (Luz/Internet)', amount: 12000, type: 'expense', category: 'Servicios' },
-  { id: 'T-005', date: '2024-05-22', description: 'Lentes Intraoculares', amount: 45000, type: 'expense', category: 'Inventario' },
-  { id: 'T-006', date: '2024-05-23', description: 'Evaluación Pediátrica', amount: 4000, type: 'income', category: 'Consultas', discipline: Discipline.Pediatric, patientId: 'P-1004', doctorId: 'doc-4' },
+  { id: 'T-001', date: '2024-05-20', description: 'Consulta Inicial - Rosa Martinez', amount: 3500, type: 'income', category: 'Consultas', discipline: Discipline.Refractive, patientId: 'P-1001', doctorId: 'doc-2', ncf: 'E3200000001', trackId: 'TRK-9912', dgiiStatus: 'Aprobado', ncfType: 'E32', isItbisExempt: true },
+  { id: 'T-002', date: '2024-05-20', description: 'Compra Insumos Quirúrgicos', amount: 150000, type: 'expense', category: 'Insumos', itbisAmount: 27000 },
+  { id: 'T-003', date: '2024-05-21', description: 'Cirugía Catarata - Juan Perez', amount: 85000, type: 'income', category: 'Cirugía', discipline: Discipline.Cataract, patientId: 'P-1002', doctorId: 'doc-2', arsCoverage: 60000, copayment: 25000, ncf: 'E3100000001', ncfType: 'E31', trackId: 'TRK-9913', dgiiStatus: 'Aprobado', isItbisExempt: true },
+  { id: 'T-004', date: '2024-05-21', description: 'Pago Servicios (Luz/Internet)', amount: 12000, type: 'expense', category: 'Servicios', itbisAmount: 2160 },
+  { id: 'T-005', date: '2024-05-22', description: 'Lentes Intraoculares', amount: 45000, type: 'expense', category: 'Inventario', itbisAmount: 8100, currency: 'USD', usdAmount: 762.71, exchangeRate: 59.0 },
+  { id: 'T-006', date: '2024-05-23', description: 'Evaluación Pediátrica', amount: 4000, type: 'income', category: 'Consultas', discipline: Discipline.Pediatric, patientId: 'P-1004', doctorId: 'doc-4', ncf: 'E3200000002', trackId: 'TRK-9914', dgiiStatus: 'Aprobado', ncfType: 'E32', isItbisExempt: true },
 ];
+
+export const MOCK_ARS_BATCHES: ArsClaimBatch[] = [
+  { id: 'BAT-2405-HUM', date: '2024-05-31', ars: 'Humano', totalClaims: 145, totalAmount: 450000, status: 'Submitted' },
+  { id: 'BAT-2405-SEN', date: '2024-05-31', ars: 'Senasa', totalClaims: 89, totalAmount: 210000, status: 'Draft' },
+];
+
+export const MOCK_GLOSAS: Glosa[] = [
+  { id: 'GL-1001', claimId: 'CLM-8821', ars: 'Mapfre', patientName: 'Ana Ruiz', amount: 3500, reason: 'Código de servicio no coincide con autorización', status: 'Pending Appeal', date: '2024-06-01' },
+  { id: 'GL-1002', claimId: 'CLM-8845', ars: 'Universal', patientName: 'Carlos D.', amount: 12000, reason: 'Falta firma del paciente', status: 'Appealed', date: '2024-05-28' },
+];
+
+export const DAILY_EXCHANGE_RATE = 59.25;
+
 
 export const REFRACTIVE_STEPS = [
   { id: 'reception', label: 'Recepción & Admisión' },

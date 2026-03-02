@@ -210,6 +210,59 @@ export interface Transaction {
   patientId?: string;
   doctorId?: string; // Newly added to filter income per doctor
   status?: 'paid' | 'pending';
+  // DGII "e-CF" & Tax
+  ncf?: string;
+  trackId?: string;
+  dgiiStatus?: 'Aprobado' | 'Rechazado' | 'Pendiente';
+  ncfType?: 'E31' | 'E45' | 'E32';
+  itbisAmount?: number;
+  isItbisExempt?: boolean;
+  ecfServiceId?: string;
+  // ARS Billing
+  arsCoverage?: number;
+  copayment?: number;
+  // Medical Payroll
+  isrRetention?: number;
+  // Treasury & Multi-Currency
+  currency?: 'RD$' | 'USD';
+  exchangeRate?: number;
+  usdAmount?: number;
+}
+
+export interface ArsClaimBatch {
+  id: string;
+  date: string;
+  ars: string;
+  totalClaims: number;
+  totalAmount: number;
+  status: 'Draft' | 'Submitted' | 'Paid' | 'Partial';
+}
+
+export interface Glosa {
+  id: string;
+  claimId: string;
+  ars: string;
+  patientName: string;
+  amount: number;
+  reason: string;
+  status: 'Pending Appeal' | 'Appealed' | 'Resolved' | 'Lost';
+  date: string;
+}
+
+export interface TillReconciliation {
+  id: string;
+  date: string;
+  staffName: string;
+  declaredCash: number;
+  declaredVerifone: number;
+  declaredTransfers: number;
+  declaredUsd: number;
+  systemCash: number;
+  systemVerifone: number;
+  systemTransfers: number;
+  systemUsd: number;
+  discrepancy: number;
+  status: 'Balanced' | 'Discrepancy' | 'Reviewed';
 }
 
 export interface KPI {

@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
-import { MOCK_TRANSACTIONS, SERVICES, MOCK_PATIENTS } from '../constants';
-import { TrendingUp, TrendingDown, Download, FileText, PlusCircle, CreditCard, Wallet, Calendar, PieChart } from 'lucide-react';
+import { MOCK_TRANSACTIONS, SERVICES, MOCK_PATIENTS, MOCK_ARS_BATCHES, MOCK_GLOSAS, DAILY_EXCHANGE_RATE } from '../constants';
+import { TrendingUp, TrendingDown, Download, FileText, PlusCircle, CreditCard, Wallet, Calendar, PieChart, Activity, AlertCircle, CheckCircle, Wifi, WifiOff, Eye, X } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { Discipline, Transaction } from '../types';
 import { InvoicePrintView } from './InvoicePrintView';
 import html2pdf from 'html2pdf.js';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../backend/firebaseConfig';
+import { BillingService } from '../backend/BillingService';
+import { EcfGeneratorService } from '../backend/EcfGeneratorService';
+import { ArsAuthorizationStatus } from '../backend/schema';
+import { v4 as uuidv4 } from 'uuid';
 
-type Tab = 'overview' | 'expenses' | 'reports' | 'ars-scrubbing' | 'payment-plans' | 'doctor-payouts' | 'client-statements';
+type Tab = 'overview' | 'expenses' | 'reports' | 'ars-scrubbing' | 'payment-plans' | 'doctor-payouts' | 'client-statements' | 'treasury';
 
 interface AccountingProps {
     transactions: Transaction[];
@@ -33,6 +39,12 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
     const [expenseAmount, setExpenseAmount] = useState('');
     const [expenseCategory, setExpenseCategory] = useState('');
     const [expenseLinkedTx, setExpenseLinkedTx] = useState('');
+
+    // DGII State
+    const [isDGIIOnline, setIsDGIIOnline] = useState(true);
+    const [showEcfModal, setShowEcfModal] = useState(false);
+    const [ecfPayload, setEcfPayload] = useState<any>(null);
+    const [isGeneratingEcf, setIsGeneratingEcf] = useState(false);
 
     const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
     const totalExpense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
@@ -68,26 +80,102 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
         })).sort((a, b) => b.month.localeCompare(a.month));
     };
 
-    const handleCreateInvoice = () => {
+    const handleCreateInvoice = async () => {
         if (!selectedPatientId || !selectedServiceId) return;
         const patient = MOCK_PATIENTS.find(p => p.id === selectedPatientId);
         const service = SERVICES.find(s => s.id === selectedServiceId);
         if (patient && service) {
-            const newTx: Transaction = {
-                id: `T-${Date.now()}`,
-                date: new Date().toISOString().split('T')[0],
-                description: service.name,
-                amount: service.cost,
-                type: 'income',
-                category: 'Servicios Médicos',
-                discipline: service.discipline,
-                patientId: patient.id,
-                status: 'pending'
-            };
-            setTransactions([newTx, ...transactions]);
-            setShowInvoiceModal(false);
-            setSelectedPatientId('');
-            setSelectedServiceId('');
+            try {
+                const encounterId = uuidv4();
+                const arsId = patient.insuranceProvider ? uuidv4() : undefined;
+
+                // --- SEED FIRESTORE CATALOG FOR DEMO ---
+                await setDoc(doc(db, 'services_catalog', service.id), {
+                    id: service.id,
+                    simon_code: `SIMON-${service.id.substring(0, 5)}`,
+                    description: service.name,
+                    base_price_rd: service.cost,
+                    is_itbis_exempt: true
+                });
+
+                if (arsId && patient.insuranceProvider) {
+                    await setDoc(doc(db, 'ars_authorizations', uuidv4()), {
+                        encounter_id: encounterId,
+                        ars_provider_id: arsId,
+                        authorization_number: `APP-${Date.now()}`,
+                        total_covered_amount: service.cost * 0.7, // 70% Coverage
+                        authorization_date: new Date().toISOString(),
+                        status: 'Approved'
+                    });
+                }
+
+                const billingService = new BillingService();
+                const newInvoices = await billingService.processCompletedEncounter(
+                    encounterId,
+                    service.id,
+                    patient.id,
+                    "001-1234567-8", // Mock Cedula
+                    arsId,
+                    "130000000" // Mock RNC
+                );
+
+                const txsToAdd: Transaction[] = newInvoices.map(inv => {
+                    const isArs = inv.payer_type === 'ARS';
+                    return {
+                        id: inv.id,
+                        date: new Date().toISOString().split('T')[0],
+                        description: isArs ? `Reclamación ARS (${patient.insuranceProvider}) - ${service.name}` : `Copago/Factura Paciente - ${service.name}`,
+                        amount: inv.total_amount,
+                        type: 'income',
+                        category: isArs ? 'Cirugía' : 'Servicios Médicos',
+                        discipline: service.discipline,
+                        patientId: patient.id,
+                        status: 'pending',
+                        ncfType: isArs ? (patient.insuranceProvider === 'Senasa' ? 'E45' : 'E31') : 'E32',
+                        ncf: `E${isArs ? (patient.insuranceProvider === 'Senasa' ? '45' : '31') : '32'}000000${Math.floor(Math.random() * 1000)}`,
+                        trackId: isDGIIOnline ? `TRK-${Math.floor(Math.random() * 10000)}` : undefined,
+                        dgiiStatus: isDGIIOnline ? 'Aprobado' : 'Pendiente',
+                        isItbisExempt: true,
+                        ecfServiceId: service.id
+                    };
+                });
+
+                setTransactions([...txsToAdd, ...transactions]);
+                setShowInvoiceModal(false);
+                setSelectedPatientId('');
+                setSelectedServiceId('');
+            } catch (err) {
+                console.error("Error connecting to Firebase:", err);
+                alert("Firestore connection failed. Check your DB Rules and setup.");
+            }
+        }
+    };
+
+    const handleViewEcf = async (transaction: Transaction) => {
+        if (!transaction.ecfServiceId) return;
+        setIsGeneratingEcf(true);
+        try {
+            const ecfService = new EcfGeneratorService();
+            const payload = await ecfService.generateEcfPayload(
+                transaction.id,
+                [
+                    {
+                        id: uuidv4(),
+                        invoice_ecf_id: transaction.id,
+                        service_id: transaction.ecfServiceId,
+                        quantity: 1,
+                        unit_price: transaction.amount,
+                        subtotal: transaction.amount
+                    }
+                ]
+            );
+            setEcfPayload(payload);
+            setShowEcfModal(true);
+        } catch (error) {
+            console.error("Error fetching ECF payload:", error);
+            alert("No se pudo generar el ECF. Asegúrate de que el backend haya registrado este comprobante.");
+        } finally {
+            setIsGeneratingEcf(false);
         }
     };
 
@@ -225,12 +313,33 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                         Pagos a Médicos
                     </button>
                     <button
+                        onClick={() => setActiveTab('treasury')}
+                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap ${activeTab === 'treasury' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+                    >
+                        Tesorería
+                    </button>
+                    <button
                         onClick={() => setActiveTab('reports')}
                         className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap ${activeTab === 'reports' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
                     >
                         Reportes
                     </button>
                 </div>
+            </div>
+
+            {/* Global Tasa de Cambio & DGII Status */}
+            <div className="flex gap-4 items-center">
+                <div className="bg-blue-50 text-blue-800 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 border border-blue-100">
+                    <Activity size={16} />
+                    Tasa de Cambio BC: RD$ {DAILY_EXCHANGE_RATE}
+                </div>
+                <button
+                    onClick={() => setIsDGIIOnline(!isDGIIOnline)}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 border ${isDGIIOnline ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-red-50 text-red-700 border-red-100'}`}
+                >
+                    {isDGIIOnline ? <Wifi size={16} /> : <WifiOff size={16} />}
+                    {isDGIIOnline ? 'DGII e-CF: Online' : 'Contingency Mode (Offline)'}
+                </button>
             </div>
 
             {/* --- TAB: OVERVIEW --- */}
@@ -332,7 +441,11 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                             </div>
                                             <div>
                                                 <p className="text-sm font-medium text-slate-900 truncate max-w-[140px]" title={t.description}>{t.description}</p>
-                                                <p className="text-xs text-slate-500">{t.category}</p>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                    <p className="text-[10px] text-slate-500">{t.category}</p>
+                                                    {t.ncf && <span className="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px] uppercase font-medium">{t.ncfType}: {t.ncf}</span>}
+                                                    {t.trackId && <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${t.dgiiStatus === 'Aprobado' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>{t.trackId}</span>}
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4 text-right">
@@ -344,6 +457,15 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                             </div>
                                             {t.type === 'income' && (
                                                 <div className="flex gap-2">
+                                                    {t.ecfServiceId && (
+                                                        <button
+                                                            onClick={() => handleViewEcf(t)}
+                                                            className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                                                            title="Ver JSON DGII e-CF"
+                                                        >
+                                                            <Eye size={16} />
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => handleDownloadPdf(t)}
                                                         disabled={isGeneratingPdf}
@@ -519,35 +641,69 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
             {/* --- TAB: ARS SCRUBBING --- */}
             {activeTab === 'ars-scrubbing' && (
                 <div className="space-y-6 overflow-y-auto pr-2 pb-4">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                        <h3 className="text-lg font-bold text-slate-900 mb-4">Automated Claim Scrubbing (ARS)</h3>
-                        <p className="text-sm text-slate-500 mb-6">Valida las reclamaciones contra las reglas de cobertura de las ARS locales antes de su envío para reducir rechazos.</p>
+                    <div className="flex justify-between items-center bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                        <div>
+                            <h3 className="text-lg font-bold text-blue-900 mb-1">Centro de Facturación ARS</h3>
+                            <p className="text-xs text-blue-700">Gestión de lotes de reclamaciones y glosas (rechazos).</p>
+                        </div>
+                        <button className="flex items-center gap-2 text-white bg-blue-600 hover:bg-blue-700 font-medium px-4 py-2 rounded-lg shadow-sm transition-all text-sm">
+                            <PlusCircle size={16} /> Crear Lote
+                        </button>
+                    </div>
 
-                        <div className="space-y-4">
-                            {[
-                                { id: 'CLM-001', patient: 'Juan Perez', ars: 'Humano', amount: 4500, status: 'ready', issues: 0 },
-                                { id: 'CLM-002', patient: 'Rosa Martinez', ars: 'Senasa', amount: 12000, status: 'error', issues: 2 },
-                                { id: 'CLM-003', patient: 'Carlos Gomez', ars: 'Universal', amount: 3500, status: 'warning', issues: 1 },
-                            ].map(claim => (
-                                <div key={claim.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`w-2 h-10 rounded-full ${claim.status === 'ready' ? 'bg-emerald-500' : claim.status === 'error' ? 'bg-red-500' : 'bg-amber-500'}`}></div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Lotes de Reclamación */}
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <FileText size={18} className="text-slate-400" /> Lotes de Reclamación
+                            </h3>
+                            <div className="space-y-3">
+                                {MOCK_ARS_BATCHES.map(batch => (
+                                    <div key={batch.id} className="flex items-center justify-between p-4 border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors">
                                         <div>
-                                            <h4 className="font-bold text-slate-800">{claim.patient}</h4>
-                                            <p className="text-xs text-slate-500">Reclamación: {claim.id} • ARS: {claim.ars}</p>
+                                            <h4 className="font-bold text-slate-800">{batch.ars}</h4>
+                                            <p className="text-[11px] text-slate-500 mt-0.5">{batch.id} • {batch.totalClaims} reclamaciones</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="font-bold text-slate-800 border-b border-dashed border-slate-200 pb-0.5 inline-block">RD$ {batch.totalAmount.toLocaleString()}</p>
+                                            <p className={`text-[11px] font-bold mt-1 ${batch.status === 'Submitted' ? 'text-blue-600' : 'text-amber-600'}`}>
+                                                {batch.status === 'Submitted' ? 'Enviado' : 'Borrador'}
+                                            </p>
+                                        </div>
+                                        <button className="p-2 ml-4 bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 rounded-lg transition-colors" title="Descargar txt para ARS">
+                                            <Download size={16} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Glosas Management */}
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <AlertCircle size={18} className="text-red-400" /> Tablero de Glosas (Rechazos)
+                            </h3>
+                            <div className="space-y-3">
+                                {MOCK_GLOSAS.map(glosa => (
+                                    <div key={glosa.id} className="flex flex-col p-4 border border-rose-100 rounded-lg bg-rose-50/30 hover:bg-rose-50/50 transition-colors">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-[11px] font-bold text-rose-600 uppercase bg-rose-100 px-2 py-0.5 rounded">{glosa.ars} - {glosa.claimId}</span>
+                                            <span className="text-sm font-bold text-slate-900">RD$ {glosa.amount.toLocaleString()}</span>
+                                        </div>
+                                        <p className="text-sm font-medium text-slate-800">{glosa.patientName}</p>
+                                        <p className="text-[11px] text-slate-600 mb-3 mt-1 leading-snug break-words">{glosa.reason}</p>
+
+                                        <div className="flex justify-between items-center mt-auto border-t border-rose-100 pt-3">
+                                            <span className={`px-2 py-1 rounded-md text-[10px] font-bold ${glosa.status === 'Pending Appeal' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
+                                                {glosa.status === 'Pending Appeal' ? 'Por Apelar' : 'Apelado'}
+                                            </span>
+                                            <button className="text-[11px] font-bold text-white bg-slate-800 px-3 py-1.5 rounded-md hover:bg-slate-900 transition-colors">
+                                                Tramitar Apelación
+                                            </button>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="font-bold text-slate-800">RD$ {claim.amount.toLocaleString()}</p>
-                                        <p className={`text-xs font-medium ${claim.status === 'ready' ? 'text-emerald-600' : claim.status === 'error' ? 'text-red-600' : 'text-amber-600'}`}>
-                                            {claim.status === 'ready' ? 'Lista para enviar' : `${claim.issues} Errores detectados`}
-                                        </p>
-                                    </div>
-                                    <button className="px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors">
-                                        {claim.status === 'ready' ? 'Enviar a ARS' : 'Revisar Errores'}
-                                    </button>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -620,30 +776,39 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                             <thead>
                                 <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
                                     <th className="p-4 font-medium">Médico</th>
-                                    <th className="p-4 font-medium text-right">Procedimientos Realizados</th>
-                                    <th className="p-4 font-medium text-right">Total Generado</th>
-                                    <th className="p-4 font-medium text-right">Monto a Liquidar (Honorarios)</th>
-                                    <th className="p-4 font-medium text-center">Acción</th>
+                                    <th className="p-4 font-medium text-right">Generado</th>
+                                    <th className="p-4 font-medium text-right">Honorarios (Bruto)</th>
+                                    <th className="p-4 font-medium text-right text-red-600">Retención ISR (10%)</th>
+                                    <th className="p-4 font-medium text-right">Pago Neto</th>
+                                    <th className="p-4 font-medium text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {[
-                                    { doctor: 'Dr. Roberto Lora', procedures: 12, generated: 240000, payout: 144000 },
-                                    { doctor: 'Dra. Ana Peña', procedures: 8, generated: 160000, payout: 96000 },
-                                    { doctor: 'Dr. Carlos Mendez', procedures: 15, generated: 300000, payout: 180000 },
-                                ].map((payout, idx) => (
-                                    <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                                        <td className="p-4 font-medium text-slate-800">{payout.doctor}</td>
-                                        <td className="p-4 text-sm text-slate-600 text-right">{payout.procedures}</td>
-                                        <td className="p-4 text-sm text-slate-800 text-right">RD$ {payout.generated.toLocaleString()}</td>
-                                        <td className="p-4 font-bold text-blue-700 text-right">RD$ {payout.payout.toLocaleString()}</td>
-                                        <td className="p-4 text-center">
-                                            <button className="bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-md text-xs font-bold transition-colors">
-                                                Liquidar
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
+                                    { doctor: 'Dr. Roberto Lora', generated: 240000, payout: 144000 },
+                                    { doctor: 'Dra. Ana Peña', generated: 160000, payout: 96000 },
+                                    { doctor: 'Dr. Carlos Mendez', generated: 300000, payout: 180000 },
+                                ].map((payout, idx) => {
+                                    const isr = payout.payout * 0.10;
+                                    const net = payout.payout - isr;
+                                    return (
+                                        <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                            <td className="p-4 font-medium text-slate-800">{payout.doctor}</td>
+                                            <td className="p-4 text-sm text-slate-600 text-right">RD$ {payout.generated.toLocaleString()}</td>
+                                            <td className="p-4 text-sm text-slate-800 text-right">RD$ {payout.payout.toLocaleString()}</td>
+                                            <td className="p-4 text-sm text-red-600 font-medium text-right">- RD$ {isr.toLocaleString()}</td>
+                                            <td className="p-4 font-bold text-emerald-600 text-right">RD$ {net.toLocaleString()}</td>
+                                            <td className="p-4 text-center flex justify-center gap-2">
+                                                <button className="bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-md text-xs font-bold transition-colors">
+                                                    Liquidar
+                                                </button>
+                                                <button className="bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 px-3 py-1.5 rounded-md text-xs font-bold transition-colors flex items-center gap-1" title="Carta de Retención">
+                                                    <FileText size={12} /> Carta
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
@@ -696,6 +861,142 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                     </div>
                 </div>
             )}
+
+            {/* --- TAB: TREASURY --- */}
+            {activeTab === 'treasury' && (
+                <div className="space-y-6 overflow-y-auto pr-2 pb-4">
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">Cuadre de Caja (Arqueo Diario)</h3>
+                                <p className="text-sm text-slate-500">Conciliación ciega de valores físicos vs registrados en el sistema.</p>
+                            </div>
+                            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors flex items-center gap-2">
+                                <PlusCircle size={16} /> Nuevo Cuadre
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Efectivo (RD$)</p>
+                                <p className="text-2xl font-bold text-slate-900">RD$ 45,000</p>
+                            </div>
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Dólares (USD)</p>
+                                <p className="text-2xl font-bold text-emerald-600">$ 1,500.00</p>
+                            </div>
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Verifone (TC/TD)</p>
+                                <p className="text-2xl font-bold text-slate-900">RD$ 120,500</p>
+                            </div>
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Transferencias</p>
+                                <p className="text-2xl font-bold text-slate-900">RD$ 65,000</p>
+                            </div>
+                        </div>
+
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
+                                    <th className="p-4 font-medium">Fecha</th>
+                                    <th className="p-4 font-medium">Cajero</th>
+                                    <th className="p-4 font-medium text-right">Sistema (Total RD$)</th>
+                                    <th className="p-4 font-medium text-right">Declarado (Total RD$)</th>
+                                    <th className="p-4 font-medium text-right">Diferencia</th>
+                                    <th className="p-4 font-medium text-center">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {[
+                                    { date: '2024-06-03 18:30', staff: 'Ana Martinez', system: 319375, declared: 319375, diff: 0, status: 'Cuadrado' },
+                                    { date: '2024-06-02 18:15', staff: 'Luis Gomez', system: 245000, declared: 244500, diff: -500, status: 'Sobrante/Faltante' }
+                                ].map((till, idx) => (
+                                    <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                        <td className="p-4 text-sm font-medium text-slate-800">{till.date}</td>
+                                        <td className="p-4 text-sm text-slate-600">{till.staff}</td>
+                                        <td className="p-4 text-sm text-slate-800 text-right">RD$ {till.system.toLocaleString()}</td>
+                                        <td className="p-4 text-sm font-bold text-slate-800 text-right">RD$ {till.declared.toLocaleString()}</td>
+                                        <td className={`p-4 text-sm font-bold text-right ${till.diff === 0 ? 'text-emerald-600' : 'text-red-600'}`}>{till.diff === 0 ? '-' : `RD$ ${till.diff.toLocaleString()}`}</td>
+                                        <td className="p-4 text-center">
+                                            <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase ${till.diff === 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                                {till.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* --- TAB: REPORTS --- */}
+            {activeTab === 'reports' && (
+                <div className="space-y-6 overflow-y-auto h-full">
+                    {/* DGII Tax Reporting Links */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                            <h4 className="font-bold text-slate-900 mb-2">Formato 606 (Compras)</h4>
+                            <p className="text-xs text-slate-500 mb-4">Exportación mensual de gastos e insumos requerida por la DGII.</p>
+                            <button className="w-full flex justify-center items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-sm font-medium transition-colors">
+                                <Download size={16} /> Generar .TXT
+                            </button>
+                        </div>
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                            <h4 className="font-bold text-slate-900 mb-2">Formato 607 (Ventas)</h4>
+                            <p className="text-xs text-slate-500 mb-4">Exportación mensual de comprobantes emitidos (E31, E32, E45).</p>
+                            <button className="w-full flex justify-center items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-sm font-medium transition-colors">
+                                <Download size={16} /> Generar .TXT
+                            </button>
+                        </div>
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                            <h4 className="font-bold text-slate-900 mb-2">Exención de ITBIS</h4>
+                            <p className="text-xs text-slate-500 mb-4">Reporte de ingresos por servicios exentos (salud) vs gravados (óptica).</p>
+                            <button className="w-full flex justify-center items-center gap-2 bg-blue-50 text-blue-700 hover:bg-blue-100 py-2 rounded-lg text-sm font-medium transition-colors">
+                                <FileText size={16} /> Ver Detalle
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Monthly Summary Table */}
+                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden col-span-2">
+                            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                                <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                                    <Calendar size={18} className="text-blue-600" />
+                                    Resumen Mensual
+                                </h3>
+                                <button className="text-slate-500 hover:text-blue-600">
+                                    <Download size={18} />
+                                </button>
+                            </div>
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr className="border-b border-slate-100">
+                                        <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Mes</th>
+                                        <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase text-right">Ingresos</th>
+                                        <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase text-right">Gastos</th>
+                                        <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase text-right">Neto</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {getMonthlyReport().map((report) => (
+                                        <tr key={report.month} className="border-b border-slate-50 hover:bg-slate-50">
+                                            <td className="px-6 py-4 text-sm font-bold text-slate-900">{report.month}</td>
+                                            <td className="px-6 py-4 text-sm text-emerald-600 text-right">RD$ {report.income.toLocaleString()}</td>
+                                            <td className="px-6 py-4 text-sm text-red-600 text-right">RD$ {report.expense.toLocaleString()}</td>
+                                            <td className={`px-6 py-4 text-sm font-bold text-right ${report.net >= 0 ? 'text-blue-900' : 'text-red-700'}`}>
+                                                RD$ {report.net.toLocaleString()}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {showExpenseModal && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in duration-200">
@@ -770,6 +1071,33 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                 className="flex-1 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-bold shadow-sm"
                             >
                                 Guardar Gasto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showEcfModal && ecfPayload && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl p-6 flex flex-col max-h-[90vh] animate-in zoom-in duration-200">
+                        <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900">Validación e-CF DGII</h3>
+                                <p className="text-sm text-slate-500">Estructura JSON Oficial (TipoeCF: {ecfPayload.eCF.Encabezado.IdDoc.TipoeCF})</p>
+                            </div>
+                            <button onClick={() => setShowEcfModal(false)} className="text-slate-400 hover:text-slate-600">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-auto bg-slate-900 text-emerald-400 p-4 rounded-lg font-mono text-xs shadow-inner">
+                            <pre>{JSON.stringify(ecfPayload, null, 2)}</pre>
+                        </div>
+                        <div className="mt-4 flex justify-end">
+                            <button
+                                onClick={() => setShowEcfModal(false)}
+                                className="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-blue-700 transition-colors"
+                            >
+                                Cerrar Ventana
                             </button>
                         </div>
                     </div>
