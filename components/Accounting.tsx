@@ -3,7 +3,8 @@ import { MOCK_TRANSACTIONS, SERVICES, MOCK_PATIENTS } from '../constants';
 import { TrendingUp, TrendingDown, Download, FileText, PlusCircle, CreditCard, Wallet, Calendar, PieChart } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { Discipline, Transaction } from '../types';
-import { MOCK_PATIENTS, SERVICES } from '../constants';
+import { InvoicePrintView } from './InvoicePrintView';
+import html2pdf from 'html2pdf.js';
 
 type Tab = 'overview' | 'expenses' | 'reports' | 'ars-scrubbing' | 'payment-plans' | 'doctor-payouts' | 'client-statements';
 
@@ -19,6 +20,10 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
     const [showInvoiceModal, setShowInvoiceModal] = useState(false);
     const [showExpenseModal, setShowExpenseModal] = useState(false);
 
+    // PDF Generation State
+    const [viewingTransaction, setViewingTransaction] = useState<Transaction | null>(null);
+    const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
     // Invoice Form State
     const [selectedPatientId, setSelectedPatientId] = useState('');
     const [selectedServiceId, setSelectedServiceId] = useState('');
@@ -27,6 +32,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
     const [expenseDescription, setExpenseDescription] = useState('');
     const [expenseAmount, setExpenseAmount] = useState('');
     const [expenseCategory, setExpenseCategory] = useState('');
+    const [expenseLinkedTx, setExpenseLinkedTx] = useState('');
 
     const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
     const totalExpense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
@@ -87,10 +93,19 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
 
     const handleCreateExpense = () => {
         if (!expenseDescription || !expenseAmount || !expenseCategory) return;
+
+        let desc = expenseDescription;
+        if (expenseLinkedTx) {
+            const linkedIncome = transactions.find(t => t.id === expenseLinkedTx);
+            if (linkedIncome) {
+                desc = `${expenseDescription} (Ref: ${linkedIncome.description})`;
+            }
+        }
+
         const newTx: Transaction = {
             id: `EXP-${Date.now()}`,
             date: new Date().toISOString().split('T')[0],
-            description: expenseDescription,
+            description: desc,
             amount: parseFloat(expenseAmount),
             type: 'expense',
             category: expenseCategory
@@ -100,6 +115,67 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
         setExpenseDescription('');
         setExpenseAmount('');
         setExpenseCategory('');
+        setExpenseLinkedTx('');
+    };
+
+    const handleDownloadPdf = async (transaction: Transaction) => {
+        setIsGeneratingPdf(true);
+        setViewingTransaction(transaction);
+
+        // Wait a tick for the React component to render in the DOM
+        setTimeout(() => {
+            const element = document.getElementById(`invoice-${transaction.id}`);
+            if (element) {
+                const opt = {
+                    margin: 10,
+                    filename: `Factura_${transaction.id.replace('T-', 'INV-')}.pdf`,
+                    image: { type: 'jpeg' as const, quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    setViewingTransaction(null);
+                    setIsGeneratingPdf(false);
+                });
+            } else {
+                setIsGeneratingPdf(false);
+                setViewingTransaction(null);
+            }
+        }, 100);
+    };
+
+    const handleWhatsAppShare = async (transaction: Transaction) => {
+        // Similar flow: we need to trigger the download, then open WhatsApp web
+        setIsGeneratingPdf(true);
+        setViewingTransaction(transaction);
+
+        setTimeout(() => {
+            const element = document.getElementById(`invoice-${transaction.id}`);
+            if (element) {
+                const opt = {
+                    margin: 10,
+                    filename: `Factura_${transaction.id.replace('T-', 'INV-')}.pdf`,
+                    image: { type: 'jpeg' as const, quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    setViewingTransaction(null);
+                    setIsGeneratingPdf(false);
+
+                    const patient = MOCK_PATIENTS.find(p => p.id === transaction.patientId);
+                    const patientPhone = patient ? patient.phone.replace(/\D/g, '') : '';
+                    const message = encodeURIComponent(`Hola${patient ? ` ${patient.firstName}` : ''}. Le confirmamos la recepción de su pago. Por favor, adjunte a este chat el archivo PDF que acaba de descargar en su navegador para que quede en sus registros. ¡Gracias por confiar en Centro Laser!`);
+
+                    window.open(`https://wa.me/${patientPhone}?text=${message}`, '_blank');
+                });
+            } else {
+                setIsGeneratingPdf(false);
+                setViewingTransaction(null);
+            }
+        }, 100);
     };
 
     return (
@@ -259,11 +335,25 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                                 <p className="text-xs text-slate-500">{t.category}</p>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <p className={`text-sm font-bold ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-700'}`}>
-                                                {t.type === 'income' ? '+' : '-'} RD$ {t.amount.toLocaleString()}
-                                            </p>
-                                            <p className="text-xs text-slate-400">{t.date}</p>
+                                        <div className="flex items-center gap-4 text-right">
+                                            <div>
+                                                <p className={`text-sm font-bold ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-700'}`}>
+                                                    {t.type === 'income' ? '+' : '-'} RD$ {t.amount.toLocaleString()}
+                                                </p>
+                                                <p className="text-xs text-slate-400">{t.date}</p>
+                                            </div>
+                                            {t.type === 'income' && (
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleDownloadPdf(t)}
+                                                        disabled={isGeneratingPdf}
+                                                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                                                        title="Descargar PDF"
+                                                    >
+                                                        <Download size={16} />
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -651,6 +741,20 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                     </select>
                                 </div>
                             </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 mb-1">Vincular a Procedimiento Realizado (Opcional)</label>
+                                <select
+                                    className="w-full border border-slate-300 rounded-lg p-2.5 text-sm"
+                                    value={expenseLinkedTx}
+                                    onChange={(e) => setExpenseLinkedTx(e.target.value)}
+                                >
+                                    <option value="">Sin vinculación...</option>
+                                    {transactions.filter(t => t.type === 'income').slice(0, 15).map(t => (
+                                        <option key={t.id} value={t.id}>{t.date} - {t.description} (Paciente: {MOCK_PATIENTS.find(p => p.id === t.patientId)?.firstName})</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
                         <div className="flex gap-3 mt-6">
@@ -671,6 +775,11 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                     </div>
                 </div>
             )}
+
+            {/* Hidden Invoice Component for PDF Generation */}
+            <div style={{ position: 'absolute', top: '-10000px', left: '-10000px' }}>
+                {viewingTransaction && <InvoicePrintView transaction={viewingTransaction} />}
+            </div>
         </div>
     );
 };
