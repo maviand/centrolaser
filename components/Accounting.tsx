@@ -130,8 +130,8 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                     margin: 10,
                     filename: `Factura_${transaction.id.replace('T-', 'INV-')}.pdf`,
                     image: { type: 'jpeg' as const, quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+                    html2canvas: { scale: 1.5, useCORS: true, windowWidth: 800 },
+                    jsPDF: { unit: 'mm' as const, format: 'letter' as const, orientation: 'portrait' as const }
                 };
 
                 html2pdf().set(opt).from(element).save().then(() => {
@@ -157,8 +157,8 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                     margin: 10,
                     filename: `Factura_${transaction.id.replace('T-', 'INV-')}.pdf`,
                     image: { type: 'jpeg' as const, quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+                    html2canvas: { scale: 1.5, useCORS: true, windowWidth: 800 },
+                    jsPDF: { unit: 'mm' as const, format: 'letter' as const, orientation: 'portrait' as const }
                 };
 
                 html2pdf().set(opt).from(element).save().then(() => {

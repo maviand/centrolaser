@@ -12,7 +12,7 @@ export const InvoicePrintView: React.FC<InvoicePrintViewProps> = ({ transaction 
     const patientName = patient ? `${patient.firstName} ${patient.lastName}` : 'Paciente General';
 
     return (
-        <div id={`invoice-${transaction.id}`} className="bg-white p-8 w-[794px] h-fit text-slate-800 mx-auto font-sans relative" style={{ minHeight: '1123px' }}>
+        <div id={`invoice-${transaction.id}`} className="bg-white p-6 md:p-8 w-[700px] max-w-[7.5in] h-fit text-slate-800 mx-auto font-sans relative" style={{ minHeight: '1000px' }}>
             {/* Header */}
             <div className="flex justify-between items-start border-b-2 border-slate-200 pb-6 mb-6">
                 <div className="flex items-center gap-4">
