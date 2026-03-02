@@ -85,78 +85,78 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
         </div>
 
         {/* Right Side: Role Selection */}
-        <div className="md:w-1/2 p-6 md:p-8 lg:p-12 flex flex-col justify-start md:justify-center bg-white overflow-y-auto flex-1 min-h-0 custom-scrollbar">
-          <h2 className="text-lg md:text-xl font-bold text-slate-900 mb-4 md:mb-6 text-center md:text-left shrink-0">Seleccione su perfil</h2>
+        <div className="md:w-1/2 p-4 md:p-8 lg:p-12 flex flex-col justify-start md:justify-center bg-white overflow-y-auto flex-1 min-h-0 custom-scrollbar">
+          <h2 className="text-base md:text-xl font-bold text-slate-900 mb-3 md:mb-6 text-center md:text-left shrink-0">Seleccione su perfil</h2>
 
-          <div className="space-y-2 md:space-y-3 lg:space-y-4 shrink-0">
+          <div className="space-y-2 md:space-y-3 shrink-0">
             <button
               onClick={() => handleRoleChange('patient')}
-              className={`w-full group relative flex items-center p-3 md:p-4 border rounded-xl transition-all text-left ${selectedRole === 'patient' ? 'border-indigo-500 bg-indigo-50 shadow-md ring-1 ring-indigo-500' : 'border-slate-200 hover:border-indigo-300'}`}
+              className={`w-full group relative flex items-center p-2.5 md:p-3 border rounded-xl transition-all text-left ${selectedRole === 'patient' ? 'border-indigo-500 bg-indigo-50 shadow-md ring-1 ring-indigo-500' : 'border-slate-200 hover:border-indigo-300'}`}
             >
-              <div className={`p-2 md:p-3 rounded-lg mr-3 md:mr-4 transition-colors shrink-0 ${selectedRole === 'patient' ? 'bg-indigo-100' : 'bg-slate-100 group-hover:bg-indigo-50'}`}>
-                <User className={selectedRole === 'patient' ? 'text-indigo-600' : 'text-slate-500'} size={20} />
+              <div className={`p-1.5 md:p-2 rounded-lg mr-3 transition-colors shrink-0 ${selectedRole === 'patient' ? 'bg-indigo-100' : 'bg-slate-100 group-hover:bg-indigo-50'}`}>
+                <User className={selectedRole === 'patient' ? 'text-indigo-600' : 'text-slate-500'} size={18} />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className={`font-bold text-sm md:text-base truncate ${selectedRole === 'patient' ? 'text-indigo-800' : 'text-slate-900'}`}>Soy Paciente</h3>
-                <p className="text-xs text-slate-500 truncate">Acceso a citas y servicios.</p>
+                <h3 className={`font-bold text-sm truncate ${selectedRole === 'patient' ? 'text-indigo-800' : 'text-slate-900'}`}>Soy Paciente</h3>
+                <p className="text-[11px] md:text-xs text-slate-500 truncate">Acceso a citas y servicios.</p>
               </div>
-              {selectedRole === 'patient' && <CheckCircle className="text-indigo-600 ml-2 shrink-0" size={18} />}
+              {selectedRole === 'patient' && <CheckCircle className="text-indigo-600 ml-2 shrink-0" size={16} />}
             </button>
 
             <button
               onClick={() => handleRoleChange('doctor')}
-              className={`w-full group relative flex items-center p-3 md:p-4 border rounded-xl transition-all text-left ${selectedRole === 'doctor' ? 'border-emerald-500 bg-emerald-50 shadow-md ring-1 ring-emerald-500' : 'border-slate-200 hover:border-emerald-300'}`}
+              className={`w-full group relative flex items-center p-2.5 md:p-3 border rounded-xl transition-all text-left ${selectedRole === 'doctor' ? 'border-emerald-500 bg-emerald-50 shadow-md ring-1 ring-emerald-500' : 'border-slate-200 hover:border-emerald-300'}`}
             >
-              <div className={`p-2 md:p-3 rounded-lg mr-3 md:mr-4 transition-colors shrink-0 ${selectedRole === 'doctor' ? 'bg-emerald-100' : 'bg-slate-100 group-hover:bg-emerald-50'}`}>
-                <Stethoscope className={selectedRole === 'doctor' ? 'text-emerald-600' : 'text-slate-500'} size={20} />
+              <div className={`p-1.5 md:p-2 rounded-lg mr-3 transition-colors shrink-0 ${selectedRole === 'doctor' ? 'bg-emerald-100' : 'bg-slate-100 group-hover:bg-emerald-50'}`}>
+                <Stethoscope className={selectedRole === 'doctor' ? 'text-emerald-600' : 'text-slate-500'} size={18} />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className={`font-bold text-sm md:text-base truncate ${selectedRole === 'doctor' ? 'text-emerald-800' : 'text-slate-900'}`}>Soy Doctor</h3>
-                <p className="text-xs text-slate-500 truncate">Gestión clínica y agenda.</p>
+                <h3 className={`font-bold text-sm truncate ${selectedRole === 'doctor' ? 'text-emerald-800' : 'text-slate-900'}`}>Soy Doctor</h3>
+                <p className="text-[11px] md:text-xs text-slate-500 truncate">Gestión clínica y agenda.</p>
               </div>
-              {selectedRole === 'doctor' && <CheckCircle className="text-emerald-600 ml-2 shrink-0" size={18} />}
+              {selectedRole === 'doctor' && <CheckCircle className="text-emerald-600 ml-2 shrink-0" size={16} />}
             </button>
 
             <button
               onClick={() => handleRoleChange('admin')}
-              className={`w-full group relative flex items-center p-3 md:p-4 border rounded-xl transition-all text-left ${selectedRole === 'admin' ? 'border-blue-500 bg-blue-50 shadow-md ring-1 ring-blue-500' : 'border-slate-200 hover:border-blue-300'}`}
+              className={`w-full group relative flex items-center p-2.5 md:p-3 border rounded-xl transition-all text-left ${selectedRole === 'admin' ? 'border-blue-500 bg-blue-50 shadow-md ring-1 ring-blue-500' : 'border-slate-200 hover:border-blue-300'}`}
             >
-              <div className={`p-2 md:p-3 rounded-lg mr-3 md:mr-4 transition-colors shrink-0 ${selectedRole === 'admin' ? 'bg-blue-100' : 'bg-slate-100 group-hover:bg-blue-50'}`}>
-                <Shield className={selectedRole === 'admin' ? 'text-blue-600' : 'text-slate-500'} size={20} />
+              <div className={`p-1.5 md:p-2 rounded-lg mr-3 transition-colors shrink-0 ${selectedRole === 'admin' ? 'bg-blue-100' : 'bg-slate-100 group-hover:bg-blue-50'}`}>
+                <Shield className={selectedRole === 'admin' ? 'text-blue-600' : 'text-slate-500'} size={18} />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className={`font-bold text-sm md:text-base truncate ${selectedRole === 'admin' ? 'text-blue-800' : 'text-slate-900'}`}>Administración</h3>
-                <p className="text-xs text-slate-500 truncate">Control total del sistema.</p>
+                <h3 className={`font-bold text-sm truncate ${selectedRole === 'admin' ? 'text-blue-800' : 'text-slate-900'}`}>Administración</h3>
+                <p className="text-[11px] md:text-xs text-slate-500 truncate">Control total del sistema.</p>
               </div>
-              {selectedRole === 'admin' && <CheckCircle className="text-blue-600 ml-2 shrink-0" size={18} />}
+              {selectedRole === 'admin' && <CheckCircle className="text-blue-600 ml-2 shrink-0" size={16} />}
             </button>
 
             <button
               onClick={() => handleRoleChange('accounting')}
-              className={`w-full group relative flex items-center p-3 md:p-4 border rounded-xl transition-all text-left ${selectedRole === 'accounting' ? 'border-orange-500 bg-orange-50 shadow-md ring-1 ring-orange-500' : 'border-slate-200 hover:border-orange-300'}`}
+              className={`w-full group relative flex items-center p-2.5 md:p-3 border rounded-xl transition-all text-left ${selectedRole === 'accounting' ? 'border-orange-500 bg-orange-50 shadow-md ring-1 ring-orange-500' : 'border-slate-200 hover:border-orange-300'}`}
             >
-              <div className={`p-2 md:p-3 rounded-lg mr-3 md:mr-4 transition-colors shrink-0 ${selectedRole === 'accounting' ? 'bg-orange-100' : 'bg-slate-100 group-hover:bg-orange-50'}`}>
-                <Lock className={selectedRole === 'accounting' ? 'text-orange-600' : 'text-slate-500'} size={20} />
+              <div className={`p-1.5 md:p-2 rounded-lg mr-3 transition-colors shrink-0 ${selectedRole === 'accounting' ? 'bg-orange-100' : 'bg-slate-100 group-hover:bg-orange-50'}`}>
+                <Lock className={selectedRole === 'accounting' ? 'text-orange-600' : 'text-slate-500'} size={18} />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className={`font-bold text-sm md:text-base truncate ${selectedRole === 'accounting' ? 'text-orange-800' : 'text-slate-900'}`}>Contabilidad</h3>
-                <p className="text-xs text-slate-500 truncate">Gestión financiera y ARS.</p>
+                <h3 className={`font-bold text-sm truncate ${selectedRole === 'accounting' ? 'text-orange-800' : 'text-slate-900'}`}>Contabilidad</h3>
+                <p className="text-[11px] md:text-xs text-slate-500 truncate">Gestión financiera y ARS.</p>
               </div>
-              {selectedRole === 'accounting' && <CheckCircle className="text-orange-600 ml-2 shrink-0" size={18} />}
+              {selectedRole === 'accounting' && <CheckCircle className="text-orange-600 ml-2 shrink-0" size={16} />}
             </button>
 
             <button
               onClick={() => handleRoleChange('callcenter')}
-              className={`w-full group relative flex items-center p-3 md:p-4 border rounded-xl transition-all text-left ${selectedRole === 'callcenter' ? 'border-purple-500 bg-purple-50 shadow-md ring-1 ring-purple-500' : 'border-slate-200 hover:border-purple-300'}`}
+              className={`w-full group relative flex items-center p-2.5 md:p-3 border rounded-xl transition-all text-left ${selectedRole === 'callcenter' ? 'border-purple-500 bg-purple-50 shadow-md ring-1 ring-purple-500' : 'border-slate-200 hover:border-purple-300'}`}
             >
-              <div className={`p-2 md:p-3 rounded-lg mr-3 md:mr-4 transition-colors shrink-0 ${selectedRole === 'callcenter' ? 'bg-purple-100' : 'bg-slate-100 group-hover:bg-purple-50'}`}>
-                <User className={selectedRole === 'callcenter' ? 'text-purple-600' : 'text-slate-500'} size={20} />
+              <div className={`p-1.5 md:p-2 rounded-lg mr-3 transition-colors shrink-0 ${selectedRole === 'callcenter' ? 'bg-purple-100' : 'bg-slate-100 group-hover:bg-purple-50'}`}>
+                <User className={selectedRole === 'callcenter' ? 'text-purple-600' : 'text-slate-500'} size={18} />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className={`font-bold text-sm md:text-base truncate ${selectedRole === 'callcenter' ? 'text-purple-800' : 'text-slate-900'}`}>Call Center</h3>
-                <p className="text-xs text-slate-500 truncate">Soporte y gestión de citas.</p>
+                <h3 className={`font-bold text-sm truncate ${selectedRole === 'callcenter' ? 'text-purple-800' : 'text-slate-900'}`}>Call Center</h3>
+                <p className="text-[11px] md:text-xs text-slate-500 truncate">Soporte y gestión de citas.</p>
               </div>
-              {selectedRole === 'callcenter' && <CheckCircle className="text-purple-600 ml-2 shrink-0" size={18} />}
+              {selectedRole === 'callcenter' && <CheckCircle className="text-purple-600 ml-2 shrink-0" size={16} />}
             </button>
           </div>
 
