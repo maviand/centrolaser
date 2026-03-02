@@ -61,6 +61,15 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
         };
     }).filter(d => d.Ingresos > 0);
 
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('es-DO', {
+            style: 'currency',
+            currency: 'DOP',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount).replace('DOP', 'RD$');
+    };
+
     // Helper: Group by Month
     const getMonthlyReport = () => {
         const report: Record<string, { income: number, expense: number }> = {};
@@ -368,7 +377,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-slate-500 mb-1">Ingresos Totales</p>
-                                <h3 className="text-2xl font-bold text-emerald-600">RD$ {totalIncome.toLocaleString()}</h3>
+                                <h3 className="text-2xl font-bold text-emerald-600">{formatCurrency(totalIncome)}</h3>
                             </div>
                             <div className="p-3 bg-emerald-50 rounded-lg text-emerald-600">
                                 <TrendingUp size={24} />
@@ -377,7 +386,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-slate-500 mb-1">Facturas Pendientes</p>
-                                <h3 className="text-2xl font-bold text-amber-600">RD$ {outstandingInvoices.toLocaleString()}</h3>
+                                <h3 className="text-2xl font-bold text-amber-600">{formatCurrency(outstandingInvoices)}</h3>
                             </div>
                             <div className="p-3 bg-amber-50 rounded-lg text-amber-600">
                                 <FileText size={24} />
@@ -386,7 +395,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-slate-500 mb-1">Gastos Operativos</p>
-                                <h3 className="text-2xl font-bold text-red-600">RD$ {totalExpense.toLocaleString()}</h3>
+                                <h3 className="text-2xl font-bold text-red-600">{formatCurrency(totalExpense)}</h3>
                             </div>
                             <div className="p-3 bg-red-50 rounded-lg text-red-600">
                                 <TrendingDown size={24} />
@@ -396,7 +405,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                             <div>
                                 <p className="text-sm font-medium text-slate-500 mb-1">Beneficio Neto</p>
                                 <h3 className={`text-2xl font-bold ${netProfit >= 0 ? 'text-blue-900' : 'text-red-600'}`}>
-                                    RD$ {netProfit.toLocaleString()}
+                                    {formatCurrency(netProfit)}
                                 </h3>
                             </div>
                             <div className="p-3 bg-blue-50 rounded-lg text-blue-900">
@@ -418,7 +427,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                         <Tooltip
                                             cursor={{ fill: '#f8fafc' }}
                                             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                            formatter={(value: number) => `RD$ ${value.toLocaleString()}`}
+                                            formatter={(value: number) => formatCurrency(value)}
                                         />
                                         <Bar dataKey="Ingresos" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
                                     </BarChart>
@@ -451,7 +460,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                         <div className="flex items-center gap-4 text-right">
                                             <div>
                                                 <p className={`text-sm font-bold ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-700'}`}>
-                                                    {t.type === 'income' ? '+' : '-'} RD$ {t.amount.toLocaleString()}
+                                                    {t.type === 'income' ? '+' : '-'} {formatCurrency(t.amount)}
                                                 </p>
                                                 <p className="text-xs text-slate-400">{t.date}</p>
                                             </div>
@@ -516,7 +525,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                         <td className="px-6 py-4 text-sm text-slate-500">
                                             <span className="bg-slate-100 px-2 py-1 rounded-full text-xs text-slate-600 border border-slate-200">{t.category}</span>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-red-600 font-bold text-right">- RD$ {t.amount.toLocaleString()}</td>
+                                        <td className="px-6 py-4 text-sm text-red-600 font-bold text-right">- {formatCurrency(t.amount)}</td>
                                     </tr>
                                 ))}
                                 {transactions.filter(t => t.type === 'expense').length === 0 && (
@@ -604,7 +613,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                 >
                                     <option value="">Seleccionar Servicio...</option>
                                     {SERVICES.map(s => (
-                                        <option key={s.id} value={s.id}>{s.name} - RD$ {s.cost.toLocaleString()}</option>
+                                        <option key={s.id} value={s.id}>{s.name} - {formatCurrency(s.cost)}</option>
                                     ))}
                                 </select>
                             </div>
@@ -613,7 +622,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                 <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-right">
                                     <span className="text-xs text-slate-500">Total a Pagar</span>
                                     <div className="text-xl font-bold text-slate-900">
-                                        RD$ {SERVICES.find(s => s.id === selectedServiceId)?.cost.toLocaleString()}
+                                        {formatCurrency(SERVICES.find(s => s.id === selectedServiceId)?.cost || 0)}
                                     </div>
                                 </div>
                             )}
@@ -665,7 +674,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                             <p className="text-[11px] text-slate-500 mt-0.5">{batch.id} • {batch.totalClaims} reclamaciones</p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="font-bold text-slate-800 border-b border-dashed border-slate-200 pb-0.5 inline-block">RD$ {batch.totalAmount.toLocaleString()}</p>
+                                            <p className="font-bold text-slate-800 border-b border-dashed border-slate-200 pb-0.5 inline-block">{formatCurrency(batch.totalAmount)}</p>
                                             <p className={`text-[11px] font-bold mt-1 ${batch.status === 'Submitted' ? 'text-blue-600' : 'text-amber-600'}`}>
                                                 {batch.status === 'Submitted' ? 'Enviado' : 'Borrador'}
                                             </p>
@@ -688,7 +697,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                     <div key={glosa.id} className="flex flex-col p-4 border border-rose-100 rounded-lg bg-rose-50/30 hover:bg-rose-50/50 transition-colors">
                                         <div className="flex items-center justify-between mb-2">
                                             <span className="text-[11px] font-bold text-rose-600 uppercase bg-rose-100 px-2 py-0.5 rounded">{glosa.ars} - {glosa.claimId}</span>
-                                            <span className="text-sm font-bold text-slate-900">RD$ {glosa.amount.toLocaleString()}</span>
+                                            <span className="text-sm font-bold text-slate-900">{formatCurrency(glosa.amount)}</span>
                                         </div>
                                         <p className="text-sm font-medium text-slate-800">{glosa.patientName}</p>
                                         <p className="text-[11px] text-slate-600 mb-3 mt-1 leading-snug break-words">{glosa.reason}</p>
@@ -742,10 +751,10 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                     <tr key={idx} className="hover:bg-slate-50 transition-colors">
                                         <td className="p-4 font-medium text-slate-800">{plan.patient}</td>
                                         <td className="p-4 text-sm text-slate-600">{plan.procedure}</td>
-                                        <td className="p-4 text-sm text-slate-800">RD$ {plan.total.toLocaleString()}</td>
-                                        <td className="p-4 font-bold text-slate-800">RD$ {plan.balance.toLocaleString()}</td>
+                                        <td className="p-4 text-sm text-slate-800">{formatCurrency(plan.total)}</td>
+                                        <td className="p-4 font-bold text-slate-800">{formatCurrency(plan.balance)}</td>
                                         <td className="p-4 text-sm">
-                                            <span className="block text-slate-800">RD$ {plan.nextAmount.toLocaleString()}</span>
+                                            <span className="block text-slate-800">{formatCurrency(plan.nextAmount)}</span>
                                             <span className="text-xs text-slate-500">{plan.nextDate}</span>
                                         </td>
                                         <td className="p-4">
@@ -794,10 +803,10 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                     return (
                                         <tr key={idx} className="hover:bg-slate-50 transition-colors">
                                             <td className="p-4 font-medium text-slate-800">{payout.doctor}</td>
-                                            <td className="p-4 text-sm text-slate-600 text-right">RD$ {payout.generated.toLocaleString()}</td>
-                                            <td className="p-4 text-sm text-slate-800 text-right">RD$ {payout.payout.toLocaleString()}</td>
-                                            <td className="p-4 text-sm text-red-600 font-medium text-right">- RD$ {isr.toLocaleString()}</td>
-                                            <td className="p-4 font-bold text-emerald-600 text-right">RD$ {net.toLocaleString()}</td>
+                                            <td className="p-4 text-sm text-slate-600 text-right">{formatCurrency(payout.generated)}</td>
+                                            <td className="p-4 text-sm text-slate-800 text-right">{formatCurrency(payout.payout)}</td>
+                                            <td className="p-4 text-sm text-red-600 font-medium text-right">- {formatCurrency(isr)}</td>
+                                            <td className="p-4 font-bold text-emerald-600 text-right">{formatCurrency(net)}</td>
                                             <td className="p-4 text-center flex justify-center gap-2">
                                                 <button className="bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-md text-xs font-bold transition-colors">
                                                     Liquidar
@@ -840,7 +849,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                     </div>
                                     <div className="w-full md:w-1/3 text-center md:text-left">
                                         <p className="text-xs text-slate-500 uppercase font-bold tracking-wide">Balance Pendiente</p>
-                                        <p className="text-xl font-bold text-red-600">RD$ {patient.balance.toLocaleString()}</p>
+                                        <p className="text-xl font-bold text-red-600">{formatCurrency(patient.balance)}</p>
                                     </div>
                                     <div className="w-full md:w-1/3 flex gap-2 justify-end">
                                         <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
@@ -879,7 +888,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Efectivo (RD$)</p>
-                                <p className="text-2xl font-bold text-slate-900">RD$ 45,000</p>
+                                <p className="text-2xl font-bold text-slate-900">{formatCurrency(45000)}</p>
                             </div>
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Dólares (USD)</p>
@@ -887,11 +896,11 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                             </div>
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Verifone (TC/TD)</p>
-                                <p className="text-2xl font-bold text-slate-900">RD$ 120,500</p>
+                                <p className="text-2xl font-bold text-slate-900">{formatCurrency(120500)}</p>
                             </div>
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Transferencias</p>
-                                <p className="text-2xl font-bold text-slate-900">RD$ 65,000</p>
+                                <p className="text-2xl font-bold text-slate-900">{formatCurrency(65000)}</p>
                             </div>
                         </div>
 
@@ -914,9 +923,9 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, setTransac
                                     <tr key={idx} className="hover:bg-slate-50 transition-colors">
                                         <td className="p-4 text-sm font-medium text-slate-800">{till.date}</td>
                                         <td className="p-4 text-sm text-slate-600">{till.staff}</td>
-                                        <td className="p-4 text-sm text-slate-800 text-right">RD$ {till.system.toLocaleString()}</td>
-                                        <td className="p-4 text-sm font-bold text-slate-800 text-right">RD$ {till.declared.toLocaleString()}</td>
-                                        <td className={`p-4 text-sm font-bold text-right ${till.diff === 0 ? 'text-emerald-600' : 'text-red-600'}`}>{till.diff === 0 ? '-' : `RD$ ${till.diff.toLocaleString()}`}</td>
+                                        <td className="p-4 text-sm text-slate-800 text-right">{formatCurrency(till.system)}</td>
+                                        <td className="p-4 text-sm font-bold text-slate-800 text-right">{formatCurrency(till.declared)}</td>
+                                        <td className={`p-4 text-sm font-bold text-right ${till.diff === 0 ? 'text-emerald-600' : 'text-red-600'}`}>{till.diff === 0 ? '-' : `${till.diff > 0 ? '+' : ''}${formatCurrency(till.diff)}`}</td>
                                         <td className="p-4 text-center">
                                             <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase ${till.diff === 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                                                 {till.status}
